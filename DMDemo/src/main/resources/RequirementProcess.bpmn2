@@ -23,11 +23,11 @@
       </bpmn2:dataInputAssociation>
     </bpmn2:userTask>
     <bpmn2:sequenceFlow id="_DE0B08E0-F2CE-4717-8741-54BDF572D3D4" drools:bgcolor="#000000" drools:selectable="true" sourceRef="processStartEvent" targetRef="_1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C"/>
-    <bpmn2:task id="_902ED141-A939-4515-8B03-897205DA42F3" drools:selectable="true" name="compile project">
+    <bpmn2:task id="_902ED141-A939-4515-8B03-897205DA42F3" drools:selectable="true" drools:taskName="compile" name="compile project">
       <bpmn2:incoming>_3F998D52-6C38-4143-9BF5-73A1725C78A8</bpmn2:incoming>
       <bpmn2:outgoing>_4518B08A-BE70-4CD3-85EB-E6418A0544E4</bpmn2:outgoing>
     </bpmn2:task>
-    <bpmn2:task id="_A969A26A-4D7B-4F74-9938-E8AFCE121B09" drools:selectable="true" name="deploy project">
+    <bpmn2:task id="_A969A26A-4D7B-4F74-9938-E8AFCE121B09" drools:selectable="true" drools:taskName="deploy" name="deploy project">
       <bpmn2:incoming>_B9EFD2D2-AE33-46E9-8833-B68ECA6DA6D9</bpmn2:incoming>
       <bpmn2:outgoing>_EB1FD7AF-3F27-4AB2-AD44-546D5843B6FE</bpmn2:outgoing>
     </bpmn2:task>
