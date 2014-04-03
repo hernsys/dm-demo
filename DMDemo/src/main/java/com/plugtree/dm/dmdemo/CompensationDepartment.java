@@ -1,5 +1,5 @@
 package com.plugtree.dm.dmdemo;
 
 public enum CompensationDepartment {
-	VACATION, PAYROLL, TICKET;
+	VACATION, PAYROLL, TRAVEL;
 }

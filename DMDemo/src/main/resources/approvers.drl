@@ -5,7 +5,7 @@ import com.plugtree.dm.dmdemo.*;
 
 global com.plugtree.dm.dmdemo.Employee hrvp;
 global com.plugtree.dm.dmdemo.CompensationDepartment payrollDepartment;
-global com.plugtree.dm.dmdemo.CompensationDepartment ticketDepartment;
+global com.plugtree.dm.dmdemo.CompensationDepartment travelDepartment;
 global com.plugtree.dm.dmdemo.CompensationDepartment vacationDepartment;
 
 
@@ -44,102 +44,60 @@ rule "Direct Supervisor review and approve the request for all types of vacation
         }
 end
 
-rule "New Annual request without salary for Saudis"
+rule "New Annual request without salary"
 	when
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.ANNUAL, requestPayment == false,
-						employee.(isSaudi == true,  role != Role.PRESIDENT)) @watch(!approvers, !compensationDepartments);
+						employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments);
 	then
-        System.out.println("Hello " + $r.employee + ". New requests for Saudi Annual leaves without salary must be approved by the following Compensation Departments: Vacation");
+        System.out.println("Hello " + $r.employee + ". New requests for Annual leaves without salary must be approved by the following Compensation Departments: Vacation");
         modify ($r) {
         	addCompensationDepartment(vacationDepartment);
         }
 end
 
-rule "New Annual request with salary for Saudis"
+rule "New Annual request with salary"
 	when
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.ANNUAL, requestPayment == true,
-		employee.(isSaudi == true,  role != Role.PRESIDENT)) @watch(!approvers, !compensationDepartments);
+		employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments);
 	then
-        System.out.println("Hello " + $r.employee + ". New requests for Saudi Annual leaves with salary must be approved by the following Compensation Departments: Payroll");
+        System.out.println("Hello " + $r.employee + ". New requests for Annual leaves with salary must be approved by the following Compensation Departments: Vacation, Payroll and Travel");
         modify ($r) {
 			addCompensationDepartment(payrollDepartment);
         }
         modify ($r) {
-			addCompensationDepartment(ticketDepartment);
+			addCompensationDepartment(travelDepartment);
         }
         modify ($r) {
 			addCompensationDepartment(vacationDepartment);
         }
 end
 
-rule "New Annual request without salary for non-Saudis"
-	when
-		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.ANNUAL, requestPayment == false,
-		employee.(isSaudi == false, role != Role.PRESIDENT)) @watch(!approvers, !compensationDepartments);
-	then
-        System.out.println("Hello " + $r.employee + ". New requests for Non-Saudi Annual leaves without salary must be approved by the following Compensation Departments: Vacation, Ticket");
-        modify ($r) {
-        	addCompensationDepartment(vacationDepartment);
-        }
-        modify ($r) {
-        	addCompensationDepartment(ticketDepartment);
-        }
-end
-
-rule "New Annual request with salary for non-Saudis"
-	when
-		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.ANNUAL, requestPayment == true,
-		employee.(isSaudi == false, role != Role.PRESIDENT)) @watch(!approvers, !compensationDepartments);
-	then
-        System.out.println("Hello " + $r.employee + ". New requests for Non-Saudi Annual leaves with salary must be approved by the following Compensation Departments: Vacation, Ticket, Payroll");
-        modify ($r) {
-			addCompensationDepartment(payrollDepartment);
-        }
-        modify ($r) {
-			addCompensationDepartment(ticketDepartment);
-        }
-        modify ($r) {
-			addCompensationDepartment(vacationDepartment);
-        }
-end
-
-rule "Update or Cancel of Annual request without salary for non-Saudis"
+rule "Update or Cancel of Annual request without salary"
 	when
 		$r:LeaveRequest(status == Status.OPEN, type in (Type.UPDATE, Type.CANCEL), leaveType == LeaveType.ANNUAL, requestPayment == false,
-		employee.(isSaudi == false, role != Role.PRESIDENT)) @watch(!approvers, !compensationDepartments);
+		employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments);
 	then
-        System.out.println("Hello " + $r.employee + ". Update/Cancel requests for Non-Saudi Annual leaves without salary must be approved by the following Compensation Departments: Vacation, Ticket");
+        System.out.println("Hello " + $r.employee + ". Update/Cancel requests for Annual leaves without salary must be approved by the following Compensation Departments: Vacation, Travel");
         modify ($r) {
         	addCompensationDepartment(vacationDepartment);
         }
         modify ($r) {
-        	addCompensationDepartment(ticketDepartment);
+        	addCompensationDepartment(travelDepartment);
         }
 end
 
-rule "Update or Cancel of Annual request with salary for non-Saudis"
+rule "Update or Cancel of Annual request with salary"
 	when
 		$r:LeaveRequest(status == Status.OPEN, type in (Type.UPDATE, Type.CANCEL), leaveType == LeaveType.ANNUAL, requestPayment == true,
-		employee.(isSaudi == false, role != Role.PRESIDENT)) @watch(!approvers, !compensationDepartments);
+		employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments);
 	then
-        System.out.println("Hello " + $r.employee + ". Update/Cancel requests for Non-Saudi Annual leaves with salary must be approved by the following Compensation Departments: Vacation, Ticket, Payroll");
+        System.out.println("Hello " + $r.employee + ". Update/Cancel requests for Annual leaves with salary must be approved by the following Compensation Departments: Vacation, Travel, Payroll");
         modify ($r) {
 			addCompensationDepartment(payrollDepartment);
         }
         modify ($r) {
-			addCompensationDepartment(ticketDepartment);
+			addCompensationDepartment(travelDepartment);
         }
-        modify ($r) {
-			addCompensationDepartment(vacationDepartment);
-        }
-end
-
-rule "New Compassionate Leave"
-	when
-		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.COMPASSIONATE,
-					employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments);
-	then
-        System.out.println("Hello " + $r.employee + ". New requests for Compassionate Leave must be approved by the following Compensation Departments: Vacation");
         modify ($r) {
 			addCompensationDepartment(vacationDepartment);
         }
@@ -210,17 +168,6 @@ rule "Exceptional more than 2 months leave"
         }
 end
 
-rule "Hajj leave"
-	when
-		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.HAJJ,
-				employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments)
-	then
-        System.out.println("Hello " + $r.employee + ". New requests for Hajj Leaves must be approved by the following Compensation Departments: Vacation");
-        modify ($r) {
-			addCompensationDepartment(vacationDepartment);
-        }
-end
-
 rule "Marriage leave"
 	when
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.MARRIAGE,
@@ -238,34 +185,6 @@ rule "Paternity leave"
 				employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments)
 	then
         System.out.println("Hello " + $r.employee + ". New requests for Paternity Leaves must be approved by the following Compensation Departments: Vacation");
-        modify ($r) {
-			addCompensationDepartment(vacationDepartment);
-        }
-end
-
-rule "Patient's accompany leave"
-	when
-		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.PATIENTS_ACCOMPANY,
-				employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments)
-	then
-        System.out.println("Hello " + $r.employee + ". New requests for Patient's accompany Leaves must also be approved by your GM and the following Compensation Departments: Vacation");
-        modify($r) {
-        	addApprover($r.employee.getSupervisor(Role.GENERAL_MANAGER));
-        }
-        modify ($r) {
-			addCompensationDepartment(vacationDepartment);
-        }
-end
-
-rule "Sports leave"
-	when
-		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.SPORTS,
-				employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments)
-	then
-        System.out.println("Hello " + $r.employee + ". New requests for Sports Leaves must also be approved by your VP and the following Compensation Departments: Vacation");
-        modify($r) {
-        	addApprover($r.employee.getSupervisor(Role.VICE_PRESIDENT));
-        }
         modify ($r) {
 			addCompensationDepartment(vacationDepartment);
         }

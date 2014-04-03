@@ -7,7 +7,6 @@ import java.util.List;
 public class Employee {
 	private Integer id;
 	private String name;
-	private Boolean isSaudi;
 	private String phone;
 	private String email;
 	private BigDecimal basicSalary;
@@ -16,7 +15,6 @@ public class Employee {
 	private Role role;
 	private Employee directSupervisor;
 	private List<Employee> reports;
-	private Integer grade;
 
 	public Employee() {
 
@@ -25,7 +23,6 @@ public class Employee {
 	private Employee(Builder builder) {
 		this.id = builder.id;
 		this.name = builder.name;
-		this.isSaudi = builder.isSaudi;
 		this.phone = builder.phone;
 		this.email = builder.email;
 		this.basicSalary = builder.basicSalary;
@@ -34,7 +31,6 @@ public class Employee {
 		this.role = builder.role;
 		this.directSupervisor = builder.directSupervisor;
 		this.reports = builder.reports;
-		this.grade = builder.grade;
 	}
 
 	
@@ -75,14 +71,6 @@ public class Employee {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public Boolean getIsSaudi() {
-		return isSaudi;
-	}
-
-	public void setIsSaudi(Boolean isSaudi) {
-		this.isSaudi = isSaudi;
 	}
 
 	public String getPhone() {
@@ -149,18 +137,9 @@ public class Employee {
 		this.reports = reports;
 	}
 
-	public Integer getGrade() {
-		return grade;
-	}
-
-	public void setGrade(Integer grade) {
-		this.grade = grade;
-	}
-
 	public static class Builder {
 		private Integer id;
 		private String name;
-		private Boolean isSaudi;
 		private String phone;
 		private String email;
 		private BigDecimal basicSalary;
@@ -169,7 +148,6 @@ public class Employee {
 		private Role role;
 		private Employee directSupervisor;
 		private List<Employee> reports;
-		private Integer grade;
 
 		public Builder(Integer id, String name) {
 			this.id = id;
@@ -178,11 +156,6 @@ public class Employee {
 
 		public Employee build() {
 			return new Employee(this);
-		}
-
-		public Builder isSaudi(Boolean isSaudi) {
-			this.isSaudi = isSaudi;
-			return this;
 		}
 
 		public Builder phone(String phone) {
@@ -222,11 +195,6 @@ public class Employee {
 
 		public Builder reports(List<Employee> reports) {
 			this.reports = reports;
-			return this;
-		}
-
-		public Builder grade(Integer grade) {
-			this.grade = grade;
 			return this;
 		}
 	}
