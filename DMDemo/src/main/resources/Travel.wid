@@ -3,7 +3,7 @@ import org.drools.core.process.core.datatype.impl.type.ObjectDataType;
 
 [
   [
-    "name" : "JTicket", 
+    "name" : "Travel", 
     "parameters" : [ 
         "MyFirstParam" : new StringDataType(), 
         "MySecondParam" : new StringDataType(), 
@@ -12,7 +12,7 @@ import org.drools.core.process.core.datatype.impl.type.ObjectDataType;
     "results" : [ 
         "Result" : new ObjectDataType("java.util.Map") 
     ], 
-    "displayName" : "J-Ticket", 
+    "displayName" : "Travel", 
     "icon" : "../../../global/defaultservicenodeicon.png" 
   ]
 ]
