@@ -1,7 +1,12 @@
 package com.plugtree.dm.proj;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.kie.api.runtime.KieContext;
+import org.kie.api.runtime.process.ProcessInstance;
 
 public class Requirement {
 
@@ -169,5 +174,12 @@ public class Requirement {
 	
 	public void setTestingDone(boolean testingDone) {
 		this.testingDone = testingDone;
+	}
+	
+	public void determineStatus(KieContext kcontext) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("req", this);
+		ProcessInstance pi = kcontext.getKieRuntime().startProcess("DMDemo.RequirementStatusSmartProcess", params);
+		assert pi.getState() == ProcessInstance.STATE_COMPLETED;
 	}
 }
