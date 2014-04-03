@@ -3,16 +3,25 @@ import org.drools.core.process.core.datatype.impl.type.ObjectDataType;
 
 [
   [
-    "name" : "MyTask|", 
+    "name" : "compile", 
     "parameters" : [ 
-        "MyFirstParam" : new StringDataType(), 
-        "MySecondParam" : new StringDataType(), 
-        "MyThirdParam" : new ObjectDataType() 
+        "compileReq" : new ObjectDataType("com.plugtree.dm.proj.Requirement") 
     ], 
     "results" : [ 
-        "Result" : new ObjectDataType("java.util.Map") 
+        "compResult" : new ObjectDataType("com.plugtree.dm.proj.Requirement")
     ], 
-    "displayName" : "My Task", 
-    "icon" : "" 
+    "displayName" : "Compile project", 
+    "icon" : "../../../global/defaultservicenodeicon.png" 
+  ],
+  [
+    "name" : "deploy", 
+    "parameters" : [ 
+        "deployReq" : new ObjectDataType("com.plugtree.dm.proj.Requirement") 
+    ], 
+    "results" : [ 
+        "deployResult" : new ObjectDataType("com.plugtree.dm.proj.Requirement")
+    ], 
+    "displayName" : "Deploy project", 
+    "icon" : "../../../global/defaultservicenodeicon.png" 
   ]
 ]
