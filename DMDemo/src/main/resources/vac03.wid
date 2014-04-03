@@ -1,0 +1,90 @@
+import org.drools.core.process.core.datatype.impl.type.StringDataType;
+import org.drools.core.process.core.datatype.impl.type.ObjectDataType;
+
+[
+  [
+    "name" : "VP-3.2.3-VAC-01", 
+    "parameters" : [ 
+        "param1" : new StringDataType(), 
+        "param2" : new StringDataType()
+    ], 
+    "results" : [ 
+        "Result" : new ObjectDataType("java.util.Map") 
+    ], 
+    "displayName" : "Fill Vacation Request", 
+    "icon" : "../../../global/defaultservicenodeicon.png" 
+  ],
+  [
+    "name" : "VP-3.2.3-VAC-02", 
+    "parameters" : [ 
+        "param1" : new StringDataType(), 
+        "param2" : new StringDataType()
+    ], 
+    "results" : [ 
+        "Result" : new ObjectDataType("java.util.Map") 
+    ], 
+    "displayName" : "Reconcile with Vacation Balance", 
+    "icon" : "../../../global/defaultservicenodeicon.png" 
+  ],
+  [
+    "name" : "VP-3.2.3-VAC-03", 
+    "parameters" : [ 
+        "param1" : new StringDataType(), 
+        "param2" : new StringDataType()
+    ], 
+    "results" : [ 
+        "Result" : new ObjectDataType("java.util.Map") 
+    ], 
+    "displayName" : "Review and Approve", 
+    "icon" : "../../../global/defaultservicenodeicon.png" 
+  ],
+  [
+    "name" : "VP-3.2.3-VAC-04", 
+    "parameters" : [ 
+        "param1" : new StringDataType(), 
+        "param2" : new StringDataType()
+    ], 
+    "results" : [ 
+        "Result" : new ObjectDataType("java.util.Map") 
+    ], 
+    "displayName" : "Review and Approve for the Vacation", 
+    "icon" : "../../../global/defaultservicenodeicon.png" 
+  ],
+  [
+    "name" : "VP-3.2.3-VAC-05", 
+    "parameters" : [ 
+        "param1" : new StringDataType(), 
+        "param2" : new StringDataType()
+    ], 
+    "results" : [ 
+        "Result" : new ObjectDataType("java.util.Map") 
+    ], 
+    "displayName" : "Approval Notification", 
+    "icon" : "../../../global/defaultservicenodeicon.png" 
+  ],
+  [
+    "name" : "VP-3.2.3-VAC-06", 
+    "parameters" : [ 
+        "param1" : new StringDataType(), 
+        "param2" : new StringDataType()
+    ], 
+    "results" : [ 
+        "Result" : new ObjectDataType("java.util.Map") 
+    ], 
+    "displayName" : "Rejection Notification", 
+    "icon" : "../../../global/defaultservicenodeicon.png" 
+  ],
+  [
+    "name" : "VP-3.2.3-VAC-07", 
+    "parameters" : [ 
+        "param1" : new StringDataType(), 
+        "param2" : new StringDataType()
+    ], 
+    "results" : [ 
+        "Result" : new ObjectDataType("java.util.Map") 
+    ], 
+    "displayName" : "Review and approve for Ticket", 
+    "icon" : "../../../global/defaultservicenodeicon.png" 
+  ]
+
+]
