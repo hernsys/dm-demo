@@ -12,6 +12,10 @@
   <bpmn2:itemDefinition id="__40BFDB0D-B986-4A1F-B67A-82B2F4342C9F_inProjectInputItem" structureRef="com.plugtree.dm.proj.Project"/>
   <bpmn2:itemDefinition id="__40BFDB0D-B986-4A1F-B67A-82B2F4342C9F_outProjectOutputItem" structureRef="com.plugtree.dm.proj.Project"/>
   <bpmn2:process id="DMDemo.SprintManagementProcess" drools:packageName="org.jbpm" drools:version="1.0" name="SprintManagementProcess" isExecutable="true">
+    <bpmn2:extensionElements>
+      <drools:import name="com.plugtree.dm.proj.Requirement"/>
+      <drools:import name="com.plugtree.dm.proj.Project"/>
+    </bpmn2:extensionElements>
     <bpmn2:property id="project" itemSubjectRef="_projectItem"/>
     <bpmn2:property id="reqCompletedName" itemSubjectRef="_reqCompletedNameItem"/>
     <bpmn2:property id="req" itemSubjectRef="_reqItem"/>
@@ -61,10 +65,12 @@
       </bpmn2:ioSpecification>
       <bpmn2:dataInputAssociation id="_XbEmSbwWEeO7N4V9-S4aOA">
         <bpmn2:sourceRef>project</bpmn2:sourceRef>
+        <bpmn2:targetRef>_DF892FB5-7B3E-49C3-9D33-FE47D35857D0_inReqInput</bpmn2:targetRef>
       </bpmn2:dataInputAssociation>
-      <bpmn2:dataInputAssociation id="_XbEmSrwWEeO7N4V9-S4aOA">
-        <bpmn2:sourceRef>outProject</bpmn2:sourceRef>
-      </bpmn2:dataInputAssociation>
+      <bpmn2:dataOutputAssociation id="_XbEmSrxWEeO7N4V9-S4aOA">
+        <bpmn2:sourceRef>_DF892FB5-7B3E-49C3-9D33-FE47D35857D0_outReqOutput</bpmn2:sourceRef>
+        <bpmn2:targetRef>project</bpmn2:targetRef>
+      </bpmn2:dataOutputAssociation>
     </bpmn2:callActivity>
     <bpmn2:sequenceFlow id="_76C31473-5AD6-4A5C-8E15-77D1A262234E" drools:bgcolor="#000000" drools:selectable="true" sourceRef="_0C94B178-D7DD-4ABF-9710-57B368670F26" targetRef="_32253AA7-DCB8-44B8-A4AF-D87452F87A99"/>
     <bpmn2:exclusiveGateway id="_F180EA27-F1E1-43C7-8B2D-D61D11FDEB5E" drools:bgcolor="#f0e68c" drools:selectable="true" drools:bordercolor="#a67f00" drools:dg="" name="" gatewayDirection="Diverging">
@@ -79,8 +85,8 @@
     <bpmn2:scriptTask id="_731B086C-4680-4C57-8DF4-75C2DF445663" drools:selectable="true" name="from toStart to ready" scriptFormat="http://www.java.com/java">
       <bpmn2:incoming>_77F807A8-FAE2-432E-9BA7-2B3B884C2C3B</bpmn2:incoming>
       <bpmn2:outgoing>_DFCCB563-6548-431A-9F39-2B37052BECB3</bpmn2:outgoing>
-      <bpmn2:script><![CDATA[for (Requirement req : project.getOpenBacklog()) {
-  req.setStatus(Requirement.Status.READY);
+      <bpmn2:script><![CDATA[for (Requirement subReq : project.getOpenBacklog()) {
+  subReq.setStatus(Requirement.Status.READY);
 }]]></bpmn2:script>
     </bpmn2:scriptTask>
     <bpmn2:sequenceFlow id="_77F807A8-FAE2-432E-9BA7-2B3B884C2C3B" drools:bgcolor="#000000" drools:selectable="true" name="no more toStartReqs" sourceRef="_F180EA27-F1E1-43C7-8B2D-D61D11FDEB5E" targetRef="_731B086C-4680-4C57-8DF4-75C2DF445663">
@@ -121,9 +127,9 @@
     <bpmn2:scriptTask id="_3DEF80B9-2D85-4E74-A981-21800FCD7F23" drools:selectable="true" name="from pending to done" scriptFormat="http://www.java.com/java">
       <bpmn2:incoming>_DC269DCC-1434-4906-BCE4-156F79D9A15F</bpmn2:incoming>
       <bpmn2:outgoing>_1F4D0BB9-5569-4C4B-8BF4-5E80000F7483</bpmn2:outgoing>
-      <bpmn2:script><![CDATA[for (Requirement req : project.getFullBacklog()) {
-  if (req.getName().equals(reqCompletedName)) {
-    req.setStatus(Requirement.Status.COMPLETED);
+      <bpmn2:script><![CDATA[for (Requirement subReq2 : project.getFullBacklog()) {
+  if (subReq2.getName().equals(reqCompletedName)) {
+    subReq2.setStatus(Requirement.Status.COMPLETED);
   }
 }
 kcontext.setVariable("reqCompletedName", null);]]></bpmn2:script>

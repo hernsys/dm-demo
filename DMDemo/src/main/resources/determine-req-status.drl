@@ -6,7 +6,7 @@ rule "Completed status"
 ruleflow-group "determine-requirement-status"
 lock-on-active
     when
-        req: Requirement(developmentDone == true, compileError == null, deployError == null, testingDone == true, bugsFound.size == 0)
+        req: Requirement(developmentDone == true, compileError == null, deployError == null, testingDone == true, bugsFound.size() == 0)
     then
         req.setStatus(Requirement.Status.COMPLETED);
 end
@@ -15,7 +15,7 @@ rule "Bugs found"
 ruleflow-group "determine-requirement-status"
 lock-on-active
     when
-        req: Requirement(developmentDone == true, compileError == null, deployError == null, testingDone == true, bugsFound.size > 0)
+        req: Requirement(developmentDone == true, compileError == null, deployError == null, testingDone == true, bugsFound.size() > 0)
     then
         req.setDevelopmentDone(false);
         req.setStatus(Requirement.Status.BUGS_FOUND);
@@ -54,7 +54,7 @@ rule "Development not done but no bugs yet"
 ruleflow-group "determine-requirement-status"
 lock-on-active
     when
-        req: Requirement(developmentDone == false, bugsFound.size == 0, bugsFixed.size == 0)
+        req: Requirement(developmentDone == false, bugsFound.size() == 0, bugsFixed.size() == 0)
     then
         req.setStatus(Requirement.Status.IN_DEVELOPMENT);
 end
@@ -63,7 +63,7 @@ rule "Development not done but all bugs fixed"
 ruleflow-group "determine-requirement-status"
 lock-on-active
     when
-        req: Requirement(developmentDone == false, bugsFixed.size > 0, bugsFixed.size == 0)
+        req: Requirement(developmentDone == false, bugsFixed.size() > 0, bugsFixed.size() == 0)
     then
         req.setStatus(Requirement.Status.BUGS_FIXED);
 end
@@ -72,8 +72,7 @@ rule "Development not done after bugs"
 ruleflow-group "determine-requirement-status"
 lock-on-active
     when
-        req: Requirement(developmentDone == false, bugsFound.size > 0)
+        req: Requirement(developmentDone == false, bugsFound.size() > 0)
     then
         req.setStatus(Requirement.Status.BUGS_FOUND);
 end
-

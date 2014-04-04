@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.omg.org/bpmn20" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:bpsim="http://www.bpsim.org/schemas/1.0" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:drools="http://www.jboss.org/drools" id="_I4Jj4LtcEeOHFbcJDq0YYQ" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd http://www.jboss.org/drools drools.xsd http://www.bpsim.org/schemas/1.0 bpsim.xsd" expressionLanguage="http://www.mvel.org/2.0" targetNamespace="http://www.omg.org/bpmn20" typeLanguage="http://www.java.com/javaTypes">
-  <bpmn2:itemDefinition id="_reqItem" structureRef="Requirement"/>
-  <bpmn2:itemDefinition id="__1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_develReqInputItem" structureRef="Requirement"/>
-  <bpmn2:itemDefinition id="__1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_develResultOutputItem" structureRef="Requirement"/>
-  <bpmn2:itemDefinition id="__6E40D302-4679-4D81-BC41-DF0388446A06_bugfixReqInputItem" structureRef="Requirement"/>
-  <bpmn2:itemDefinition id="__6E40D302-4679-4D81-BC41-DF0388446A06_bugfixResultOutputItem" structureRef="Requirement"/>
-  <bpmn2:itemDefinition id="__6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_testReqInputItem" structureRef="Requirement"/>
-  <bpmn2:itemDefinition id="__6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_testResultOutputItem" structureRef="Requirement"/>
+  <bpmn2:itemDefinition id="_reqItem" structureRef="com.plugtree.dm.proj.Requirement"/>
+  <bpmn2:itemDefinition id="__1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_develReqInputItem" structureRef="com.plugtree.dm.proj.Requirement"/>
+  <bpmn2:itemDefinition id="__1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_develResultOutputItem" structureRef="com.plugtree.dm.proj.Requirement"/>
+  <bpmn2:itemDefinition id="__6E40D302-4679-4D81-BC41-DF0388446A06_bugfixReqInputItem" structureRef="com.plugtree.dm.proj.Requirement"/>
+  <bpmn2:itemDefinition id="__6E40D302-4679-4D81-BC41-DF0388446A06_bugfixResultOutputItem" structureRef="com.plugtree.dm.proj.Requirement"/>
+  <bpmn2:itemDefinition id="__6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_testReqInputItem" structureRef="com.plugtree.dm.proj.Requirement"/>
+  <bpmn2:itemDefinition id="__6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_testResultOutputItem" structureRef="com.plugtree.dm.proj.Requirement"/>
   <bpmn2:itemDefinition id="__5359AF1A-3FEB-4187-A61A-4525E6B883FA_compileReqInputItem" structureRef="com.plugtree.dm.proj.Requirement"/>
   <bpmn2:itemDefinition id="__5359AF1A-3FEB-4187-A61A-4525E6B883FA_compResultOutputItem" structureRef="com.plugtree.dm.proj.Requirement"/>
   <bpmn2:itemDefinition id="__466AD88D-9116-4DE1-8ADB-A9F389CAB03A_deployReqInputItem" structureRef="com.plugtree.dm.proj.Requirement"/>
   <bpmn2:itemDefinition id="__466AD88D-9116-4DE1-8ADB-A9F389CAB03A_deployResultOutputItem" structureRef="com.plugtree.dm.proj.Requirement"/>
   <bpmn2:process id="DMDemo.RequirementProcess" drools:packageName="org.jbpm" drools:version="1.0" name="RequirementProcess" isExecutable="true">
+    <bpmn2:extensionElements>
+      <drools:import name="com.plugtree.dm.proj.Requirement"/>
+      <drools:import name="com.plugtree.dm.proj.Project"/>
+    </bpmn2:extensionElements>
     <bpmn2:property id="req" itemSubjectRef="_reqItem"/>
     <bpmn2:startEvent id="processStartEvent" drools:bgcolor="#9acd32" drools:selectable="true" name="startReq">
       <bpmn2:outgoing>_DE0B08E0-F2CE-4717-8741-54BDF572D3D4</bpmn2:outgoing>
@@ -21,9 +25,9 @@
       <bpmn2:outgoing>_6FFE381E-F07A-46FF-8FBF-6495D727D576</bpmn2:outgoing>
       <bpmn2:ioSpecification id="_I4Jj4btcEeOHFbcJDq0YYQ">
         <bpmn2:dataInput id="_1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_TaskNameInput" name="TaskName"/>
-        <bpmn2:dataInput id="_1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_develReqInput" drools:dtype="Requirement" itemSubjectRef="__1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_develReqInputItem" name="develReq"/>
+        <bpmn2:dataInput id="_1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_develReqInput" drools:dtype="com.plugtree.dm.proj.Requirement" itemSubjectRef="__1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_develReqInputItem" name="develReq"/>
         <bpmn2:dataInput id="_1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_GroupIdInput" name="GroupId"/>
-        <bpmn2:dataOutput id="_1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_develResultOutput" drools:dtype="Requirement" itemSubjectRef="__1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_develResultOutputItem" name="develResult"/>
+        <bpmn2:dataOutput id="_1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_develResultOutput" drools:dtype="com.plugtree.dm.proj.Requirement" itemSubjectRef="__1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_develResultOutputItem" name="develResult"/>
         <bpmn2:inputSet id="_I4Jj4rtcEeOHFbcJDq0YYQ">
           <bpmn2:dataInputRefs>_1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_develReqInput</bpmn2:dataInputRefs>
           <bpmn2:dataInputRefs>_1D00AD4E-F56B-4521-98D7-16E6F7D7DF6C_TaskNameInput</bpmn2:dataInputRefs>
@@ -60,7 +64,7 @@
     <bpmn2:scriptTask id="_09D584FA-3C8D-4145-95F7-E91480851C4D" drools:selectable="true" name="mark as completed" scriptFormat="http://www.java.com/java">
       <bpmn2:incoming>_0009E023-2F58-4EF0-B07E-989C8532FE1A</bpmn2:incoming>
       <bpmn2:outgoing>_E94BB12F-4441-4DF3-89FB-8CEFCBA236AC</bpmn2:outgoing>
-      <bpmn2:script><![CDATA[req.setCompleted(true);]]></bpmn2:script>
+      <bpmn2:script><![CDATA[req.setStatus(Requirement.Status.COMPLETED);]]></bpmn2:script>
     </bpmn2:scriptTask>
     <bpmn2:sequenceFlow id="_E94BB12F-4441-4DF3-89FB-8CEFCBA236AC" drools:bgcolor="#000000" drools:selectable="true" sourceRef="_09D584FA-3C8D-4145-95F7-E91480851C4D" targetRef="_8758674A-AAF0-435A-97F6-AE5A9DCFE5B8"/>
     <bpmn2:endEvent id="_8758674A-AAF0-435A-97F6-AE5A9DCFE5B8" drools:bgcolor="#ff6347" drools:selectable="true" name="reqCompleted">
@@ -85,9 +89,9 @@
       <bpmn2:outgoing>_32AE9A8C-B9C7-481E-B649-323DAB9B92E0</bpmn2:outgoing>
       <bpmn2:ioSpecification id="_I4Jj8btcEeOHFbcJDq0YYQ">
         <bpmn2:dataInput id="_6E40D302-4679-4D81-BC41-DF0388446A06_TaskNameInput" name="TaskName"/>
-        <bpmn2:dataInput id="_6E40D302-4679-4D81-BC41-DF0388446A06_bugfixReqInput" drools:dtype="Requirement" itemSubjectRef="__6E40D302-4679-4D81-BC41-DF0388446A06_bugfixReqInputItem" name="bugfixReq"/>
+        <bpmn2:dataInput id="_6E40D302-4679-4D81-BC41-DF0388446A06_bugfixReqInput" drools:dtype="com.plugtree.dm.proj.Requirement" itemSubjectRef="__6E40D302-4679-4D81-BC41-DF0388446A06_bugfixReqInputItem" name="bugfixReq"/>
         <bpmn2:dataInput id="_6E40D302-4679-4D81-BC41-DF0388446A06_GroupIdInput" name="GroupId"/>
-        <bpmn2:dataOutput id="_6E40D302-4679-4D81-BC41-DF0388446A06_bugfixResultOutput" drools:dtype="Requirement" itemSubjectRef="__6E40D302-4679-4D81-BC41-DF0388446A06_bugfixResultOutputItem" name="bugfixResult"/>
+        <bpmn2:dataOutput id="_6E40D302-4679-4D81-BC41-DF0388446A06_bugfixResultOutput" drools:dtype="com.plugtree.dm.proj.Requirement" itemSubjectRef="__6E40D302-4679-4D81-BC41-DF0388446A06_bugfixResultOutputItem" name="bugfixResult"/>
         <bpmn2:inputSet id="_I4Jj8rtcEeOHFbcJDq0YYQ">
           <bpmn2:dataInputRefs>_6E40D302-4679-4D81-BC41-DF0388446A06_bugfixReqInput</bpmn2:dataInputRefs>
           <bpmn2:dataInputRefs>_6E40D302-4679-4D81-BC41-DF0388446A06_TaskNameInput</bpmn2:dataInputRefs>
@@ -143,9 +147,9 @@
       <bpmn2:outgoing>_D38438A5-5E5C-4531-8E96-0D6DA4B2AFB1</bpmn2:outgoing>
       <bpmn2:ioSpecification id="_I4Jj_7tcEeOHFbcJDq0YYQ">
         <bpmn2:dataInput id="_6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_TaskNameInput" name="TaskName"/>
-        <bpmn2:dataInput id="_6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_testReqInput" drools:dtype="Requirement" itemSubjectRef="__6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_testReqInputItem" name="testReq"/>
+        <bpmn2:dataInput id="_6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_testReqInput" drools:dtype="com.plugtree.dm.proj.Requirement" itemSubjectRef="__6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_testReqInputItem" name="testReq"/>
         <bpmn2:dataInput id="_6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_GroupIdInput" name="GroupId"/>
-        <bpmn2:dataOutput id="_6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_testResultOutput" drools:dtype="Requirement" itemSubjectRef="__6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_testResultOutputItem" name="testResult"/>
+        <bpmn2:dataOutput id="_6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_testResultOutput" drools:dtype="com.plugtree.dm.proj.Requirement" itemSubjectRef="__6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_testResultOutputItem" name="testResult"/>
         <bpmn2:inputSet id="_I4JkALtcEeOHFbcJDq0YYQ">
           <bpmn2:dataInputRefs>_6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_testReqInput</bpmn2:dataInputRefs>
           <bpmn2:dataInputRefs>_6248A4FF-0C1D-47E8-8D0B-9778B3A31C14_TaskNameInput</bpmn2:dataInputRefs>

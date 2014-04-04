@@ -23,8 +23,8 @@ public class Requirement {
 	private List<Bug> bugsFound = new ArrayList<Bug>();
 	private List<Bug> bugsFixed = new ArrayList<Bug>();
 	
-	private String compileErrorMessage;
-	private String deployErrorMessage;
+	private String compileError;
+	private String deployError;
 	
 	private boolean testingDone = false;
 	private boolean developmentDone = false;
@@ -152,20 +152,20 @@ public class Requirement {
 		return !bugsFound.isEmpty();
 	}
 	
-	public String getCompileErrorMessage() {
-		return compileErrorMessage;
+	public String getCompileError() {
+		return compileError;
 	}
 	
-	public String getDeployErrorMessage() {
-		return deployErrorMessage;
+	public String getDeployError() {
+		return deployError;
 	}
 	
-	public void setCompileErrorMessage(String compileErrorMessage) {
-		this.compileErrorMessage = compileErrorMessage;
+	public void setCompileError(String compileError) {
+		this.compileError = compileError;
 	}
 	
-	public void setDeployErrorMessage(String deployErrorMessage) {
-		this.deployErrorMessage = deployErrorMessage;
+	public void setDeployError(String deployError) {
+		this.deployError = deployError;
 	}
 	
 	public void setDevelopmentDone(boolean developmentDone) {
