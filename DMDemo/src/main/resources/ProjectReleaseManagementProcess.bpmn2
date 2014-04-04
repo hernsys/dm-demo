@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.omg.org/bpmn20" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:bpsim="http://www.bpsim.org/schemas/1.0" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:drools="http://www.jboss.org/drools" id="_XhOeUbwmEeOcerp-3tN8DA" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd http://www.jboss.org/drools drools.xsd http://www.bpsim.org/schemas/1.0 bpsim.xsd" expressionLanguage="http://www.mvel.org/2.0" targetNamespace="http://www.omg.org/bpmn20" typeLanguage="http://www.java.com/javaTypes">
   <bpmn2:itemDefinition id="_projectItem" structureRef="com.plugtree.dm.proj.Project"/>
   <bpmn2:itemDefinition id="__E93A2015-BCDB-4CFF-9700-A0A533A4EE38_projectInputItem" structureRef="com.plugtree.dm.proj.Project"/>
@@ -23,11 +23,11 @@
           <bpmn2:dataOutputRefs>_E93A2015-BCDB-4CFF-9700-A0A533A4EE38_projectOutput</bpmn2:dataOutputRefs>
         </bpmn2:outputSet>
       </bpmn2:ioSpecification>
+      <bpmn2:dataInputAssociation id="_XhSIsrxmEeOcerp-3tN8DA">
+        <bpmn2:sourceRef>project</bpmn2:sourceRef>
+        <bpmn2:targetRef>_E93A2015-BCDB-4CFF-9700-A0A533A4EE38_projectInput</bpmn2:targetRef>
+      </bpmn2:dataInputAssociation>
       <bpmn2:dataOutputAssociation id="_XhSIsrwmEeOcerp-3tN8DA">
-        <bpmn2:sourceRef>_E93A2015-BCDB-4CFF-9700-A0A533A4EE38_projectOutput</bpmn2:sourceRef>
-        <bpmn2:targetRef>project</bpmn2:targetRef>
-      </bpmn2:dataOutputAssociation>
-      <bpmn2:dataOutputAssociation id="_XhSIs7wmEeOcerp-3tN8DA">
         <bpmn2:sourceRef>_E93A2015-BCDB-4CFF-9700-A0A533A4EE38_projectOutput</bpmn2:sourceRef>
         <bpmn2:targetRef>project</bpmn2:targetRef>
       </bpmn2:dataOutputAssociation>
@@ -49,10 +49,10 @@
         <bpmn2:sourceRef>_1D81FF0E-3522-4745-B369-D5670F6E2034_projectOutput</bpmn2:sourceRef>
         <bpmn2:targetRef>project</bpmn2:targetRef>
       </bpmn2:dataOutputAssociation>
-      <bpmn2:dataOutputAssociation id="_XhSIuLwmEeOcerp-3tN8DA">
-        <bpmn2:sourceRef>_1D81FF0E-3522-4745-B369-D5670F6E2034_projectOutput</bpmn2:sourceRef>
-        <bpmn2:targetRef>project</bpmn2:targetRef>
-      </bpmn2:dataOutputAssociation>
+      <bpmn2:dataInputAssociation id="_XhSIuLwxEeOcerp-3tN8DA">
+        <bpmn2:sourceRef>project</bpmn2:sourceRef>
+        <bpmn2:targetRef>_1D81FF0E-3522-4745-B369-D5670F6E2034_projectInput</bpmn2:targetRef>
+      </bpmn2:dataInputAssociation>
     </bpmn2:callActivity>
     <bpmn2:sequenceFlow id="_1AFDA3E9-9C2C-46E4-8285-83B818B13538" drools:bgcolor="#000000" drools:selectable="true" sourceRef="_793BD9E3-498B-4DAC-AE89-F1044C8817FF" targetRef="_1D81FF0E-3522-4745-B369-D5670F6E2034"/>
     <bpmn2:exclusiveGateway id="_43C9C64A-AD03-4EC2-8B0C-664CBCA623FA" drools:bgcolor="#f0e68c" drools:selectable="true" drools:bordercolor="#a67f00" drools:dg="" name="" gatewayDirection="Diverging">
