@@ -89,22 +89,22 @@
         <bpmn2:incoming>_111BB1FD-FB5F-4019-AB38-0ED111A39091</bpmn2:incoming>
         <bpmn2:outgoing>_96C11A66-C8B6-49C3-AD79-112551F6504F</bpmn2:outgoing>
         <bpmn2:ioSpecification id="_IFiUzLwYEeO7N4V9-S4aOA">
-          <bpmn2:dataInput id="_E426226B-8CF0-4441-9D39-53873F2401C4_backlogInInput" drools:dtype="java.util.List" name="backlogIn"/>
-          <bpmn2:dataOutput id="_E426226B-8CF0-4441-9D39-53873F2401C4_backlogOutOutput" drools:dtype="java.util.List" name="backlogOut"/>
+          <bpmn2:dataInput id="_E426226B-8CF0-4441-9D39-53873F2401C4_projInInput" drools:dtype="com.plugtree.dm.proj.Project" name="projIn"/>
+          <bpmn2:dataOutput id="_E426226B-8CF0-4441-9D39-53873F2401C4_projOutOutput" drools:dtype="com.plugtree.dm.proj.Project" name="projOut"/>
           <bpmn2:inputSet id="_IFiUzbwYEeO7N4V9-S4aOA">
-            <bpmn2:dataInputRefs>_E426226B-8CF0-4441-9D39-53873F2401C4_backlogInInput</bpmn2:dataInputRefs>
+            <bpmn2:dataInputRefs>_E426226B-8CF0-4441-9D39-53873F2401C4_projInInput</bpmn2:dataInputRefs>
           </bpmn2:inputSet>
           <bpmn2:outputSet id="_IFiUzrwYEeO7N4V9-S4aOA">
-            <bpmn2:dataOutputRefs>_E426226B-8CF0-4441-9D39-53873F2401C4_backlogOutOutput</bpmn2:dataOutputRefs>
+            <bpmn2:dataOutputRefs>_E426226B-8CF0-4441-9D39-53873F2401C4_projOutOutput</bpmn2:dataOutputRefs>
           </bpmn2:outputSet>
         </bpmn2:ioSpecification>
         <bpmn2:dataInputAssociation id="_IFiUz7wYEeO7N4V9-S4aOA">
-          <bpmn2:sourceRef>openBacklog</bpmn2:sourceRef>
-          <bpmn2:targetRef>_E426226B-8CF0-4441-9D39-53873F2401C4_backlogInInput</bpmn2:targetRef>
+          <bpmn2:sourceRef>project</bpmn2:sourceRef>
+          <bpmn2:targetRef>_E426226B-8CF0-4441-9D39-53873F2401C4_projInInput</bpmn2:targetRef>
         </bpmn2:dataInputAssociation>
         <bpmn2:dataOutputAssociation id="_IFiU0LwYEeO7N4V9-S4aOA">
-          <bpmn2:sourceRef>_E426226B-8CF0-4441-9D39-53873F2401C4_backlogOutOutput</bpmn2:sourceRef>
-          <bpmn2:targetRef>openBacklog</bpmn2:targetRef>
+          <bpmn2:sourceRef>_E426226B-8CF0-4441-9D39-53873F2401C4_projOutOutput</bpmn2:sourceRef>
+          <bpmn2:targetRef>project</bpmn2:targetRef>
         </bpmn2:dataOutputAssociation>
       </bpmn2:callActivity>
       <bpmn2:endEvent id="_25962191-0DA4-453B-9DD7-C251693AD01C" drools:bgcolor="#ff6347" drools:selectable="true" name="sprintEnd">
