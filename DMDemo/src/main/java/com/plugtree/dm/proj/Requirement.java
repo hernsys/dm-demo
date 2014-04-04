@@ -11,7 +11,7 @@ import org.kie.api.runtime.process.ProcessInstance;
 public class Requirement {
 
 	public static enum Status {
-		READY, IN_DEVELOPMENT, COMPILE_ERROR, DEPLOY_ERROR, IN_TEST, BUGS_FOUND, BUGS_FIXED, COMPLETED, INVALID;   
+		CREATED, READY, IN_DEVELOPMENT, COMPILE_ERROR, DEPLOY_ERROR, IN_TEST, BUGS_FOUND, BUGS_FIXED, COMPLETED, INVALID;   
 	}
 	
 	private List<Assignment> developers = new ArrayList<Assignment>();
@@ -19,7 +19,7 @@ public class Requirement {
 	private String name;
 	private String description;
 	private int priority;
-	private Status status = Status.READY;
+	private Status status = Status.CREATED;
 	private List<Bug> bugsFound = new ArrayList<Bug>();
 	private List<Bug> bugsFixed = new ArrayList<Bug>();
 	
