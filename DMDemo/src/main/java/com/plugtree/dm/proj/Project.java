@@ -100,4 +100,12 @@ public class Project {
 	public Requirement nextToStartRequirement() {
 		return getToStartBacklog().iterator().next();
 	}
+	
+	public void addNewRequirement(Requirement requirement) {
+		requirement.setStatus(Requirement.Status.CREATED);
+	}
+	
+	public void updateLatestStableVersion() {
+		//TODO implement this method
+	}
 }

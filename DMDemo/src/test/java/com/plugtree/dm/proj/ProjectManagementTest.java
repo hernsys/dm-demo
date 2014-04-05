@@ -32,5 +32,6 @@ public class ProjectManagementTest {
 		params.put("req", req);
 		ProcessInstance pi = ksession.startProcess("DMDemo.RequirementProcess", params);
 		Assert.assertNotNull(pi);
+		Assert.assertEquals(ProcessInstance.STATE_ACTIVE, pi.getState());
 	}
 }

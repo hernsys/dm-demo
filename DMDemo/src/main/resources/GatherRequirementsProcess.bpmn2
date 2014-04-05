@@ -3,6 +3,7 @@
   <bpmn2:itemDefinition id="_projectItem" structureRef="com.plugtree.dm.proj.Project"/>
   <bpmn2:itemDefinition id="_reqItem" structureRef="com.plugtree.dm.proj.Requirement"/>
   <bpmn2:itemDefinition id="_userSelectionItem" structureRef="String"/>
+  <bpmn2:itemDefinition id="_deployResultItem" structureRef="String"/>
   <bpmn2:itemDefinition id="__E3B32DEC-4828-40D2-A27F-34C73B1AE94B_inProjectInputItem" structureRef="com.plugtree.dm.proj.Project"/>
   <bpmn2:itemDefinition id="__E3B32DEC-4828-40D2-A27F-34C73B1AE94B_GroupIdInputItem" structureRef="Object"/>
   <bpmn2:itemDefinition id="__E3B32DEC-4828-40D2-A27F-34C73B1AE94B_outUserSelectionOutputItem" structureRef="String"/>
@@ -15,6 +16,7 @@
     <bpmn2:property id="project" itemSubjectRef="_projectItem"/>
     <bpmn2:property id="req" itemSubjectRef="_reqItem"/>
     <bpmn2:property id="userSelection" itemSubjectRef="_userSelectionItem"/>
+    <bpmn2:property id="deployResult" itemSubjectRef="_deployResultItem"/>
     <bpmn2:startEvent id="processStartEvent" drools:bgcolor="#9acd32" drools:selectable="true" name="">
       <bpmn2:outgoing>_A262A738-C1A5-4627-8305-303529308B82</bpmn2:outgoing>
     </bpmn2:startEvent>

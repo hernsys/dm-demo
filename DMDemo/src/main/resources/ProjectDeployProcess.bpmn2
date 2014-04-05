@@ -58,13 +58,14 @@
       </bpmn2:dataInputAssociation>
       <bpmn2:dataInputAssociation id="_rr-Uyrz0EeOQnagyLpSBzg">
         <bpmn2:sourceRef>envToDeploy</bpmn2:sourceRef>
+        <bpmn2:sourceRef>_718B72BE-0B09-4128-80BA-87F21B4C4769_environmentInput</bpmn2:sourceRef>
       </bpmn2:dataInputAssociation>
       <bpmn2:dataOutputAssociation id="_rr-Uy7z0EeOQnagyLpSBzg">
         <bpmn2:sourceRef>_718B72BE-0B09-4128-80BA-87F21B4C4769_deployResultOutput</bpmn2:sourceRef>
         <bpmn2:targetRef>deployResult</bpmn2:targetRef>
       </bpmn2:dataOutputAssociation>
     </bpmn2:task>
-    <bpmn2:task id="_6E46E67F-3808-4DE2-B542-4817F81EF456" drools:selectable="true" name="Perform automated tests on environment">
+    <bpmn2:task id="_6E46E67F-3808-4DE2-B542-4817F81EF456" drools:selectable="true" drools:taskName="automaticTests" name="Perform automated tests on environment">
       <bpmn2:incoming>_FC6A5DEA-CA7F-4A5E-B6D7-49B2E51DA676</bpmn2:incoming>
       <bpmn2:outgoing>_460BCD54-A4FD-461A-8B8D-E2927F4ACDDF</bpmn2:outgoing>
     </bpmn2:task>
@@ -163,7 +164,7 @@
       <bpmn2:outgoing>_E812D683-5DB6-415F-8F00-3218B6F3B09B</bpmn2:outgoing>
     </bpmn2:parallelGateway>
     <bpmn2:sequenceFlow id="_6BC6B754-388F-41B0-9BBD-362061AD8613" drools:bgcolor="#000000" drools:selectable="true" sourceRef="_C4874806-72D2-4646-BC5C-2DADE53AC656" targetRef="_13160800-9E9B-46C9-8837-A7DA46E937B9"/>
-    <bpmn2:task id="_F12C0DCD-9E1B-401E-8C09-04CAC8DD06E5" drools:selectable="true" name="notify involved people of rollback in process in environment">
+    <bpmn2:task id="_F12C0DCD-9E1B-401E-8C09-04CAC8DD06E5" drools:selectable="true" drools:taskName="notification" name="notify involved people of rollback in process in environment">
       <bpmn2:incoming>_E812D683-5DB6-415F-8F00-3218B6F3B09B</bpmn2:incoming>
       <bpmn2:outgoing>_119F3293-75E2-4C13-8977-89786BEA76C0</bpmn2:outgoing>
     </bpmn2:task>
@@ -175,7 +176,7 @@
       <bpmn2:outgoing>_AFDA24E0-EAD1-403B-85E6-A0EB8B3A4405</bpmn2:outgoing>
     </bpmn2:parallelGateway>
     <bpmn2:sequenceFlow id="_FE372540-4219-412A-B5EA-0669A5A3CCAA" drools:bgcolor="#000000" drools:selectable="true" sourceRef="_13160800-9E9B-46C9-8837-A7DA46E937B9" targetRef="_17847D12-F92B-4B24-B4DC-22CE769629BF"/>
-    <bpmn2:task id="_F90715A3-CC80-46AB-8CA8-7877BC56A3E2" drools:selectable="true" name="notify involved people of rolback done in environment">
+    <bpmn2:task id="_F90715A3-CC80-46AB-8CA8-7877BC56A3E2" drools:selectable="true" drools:taskName="notification" name="notify involved people of rolback done in environment">
       <bpmn2:incoming>_AFDA24E0-EAD1-403B-85E6-A0EB8B3A4405</bpmn2:incoming>
       <bpmn2:outgoing>_D19613A0-2550-4AA6-B971-11A81EAB58C4</bpmn2:outgoing>
     </bpmn2:task>
