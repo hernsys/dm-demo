@@ -65,7 +65,7 @@ public class HRProcessTest {
 
 		// Assert that the task "Travel" has been fired + task in subprocess:
 		// rollback form to direct manager
-		assertWorkItemsTriggered(ROLLBACK_FORM_TO_DIRECT_MANAGER, TRAVEL);
+		assertWorkItemsTriggered(TRAVEL, ROLLBACK_FORM_TO_DIRECT_MANAGER);
 
 		// Assert that the Process is completed
 		Assert.assertEquals(ProcessInstance.STATE_COMPLETED,
@@ -74,6 +74,174 @@ public class HRProcessTest {
 		// Dispose the knowledge session
 		ksession.dispose();
 
+	}
+
+	@Test
+	public void testCancel_Travel_HRDirector() {
+		KieSession ksession = createSession();
+
+		// Add Work item handlers for service and human tasks
+		registerWorkItemHandlers(ksession);
+		// Register Listener for testing purposes
+		ksession.addEventListener(new TestProcessEventListener());
+
+		// Start the process, with approval type ROLLBACK MANAGER
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("approvalType", ApprovalType.ROLLBACK_MANAGER);
+		params.put("requestType", LeaveRequest.Type.CANCEL);
+		params.put("hasTravel", Boolean.TRUE);
+		params.put("requiresHRDirector", Boolean.TRUE);
+		ProcessInstance processInstance = ksession.startProcess(HR_PROCESS_ID,
+				params);
+		// Assert process created
+		Assert.assertNotNull(processInstance);
+
+		// Assert that the tasks "Travel", "HR Director" have been fired + task
+		// in subprocess:
+		// rollback form to direct manager
+		assertWorkItemsTriggered(TRAVEL, HR_DIRECTOR,
+				ROLLBACK_FORM_TO_DIRECT_MANAGER);
+
+		// Assert that the Process is completed
+		Assert.assertEquals(ProcessInstance.STATE_COMPLETED,
+				processInstance.getState());
+
+		// Dispose the knowledge session
+		ksession.dispose();
+	}
+
+	@Test
+	public void testCancel_NoTravel_NoHumanResources_NoHRDirector() {
+		KieSession ksession = createSession();
+
+		// Add Work item handlers for service and human tasks
+		registerWorkItemHandlers(ksession);
+		// Register Listener for testing purposes
+		ksession.addEventListener(new TestProcessEventListener());
+
+		// Start the process, with approval type ROLLBACK MANAGER
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("approvalType", ApprovalType.ROLLBACK_MANAGER);
+		params.put("requestType", LeaveRequest.Type.CANCEL);
+		params.put("hasTravel", Boolean.FALSE);
+		params.put("requiresHR", Boolean.FALSE);
+		params.put("requiresHRDirector", Boolean.FALSE);
+		ProcessInstance processInstance = ksession.startProcess(HR_PROCESS_ID,
+				params);
+		// Assert process created
+		Assert.assertNotNull(processInstance);
+
+		// Assert that only the tasks of the subprocess were fired: rollback
+		// form to direct manager
+		assertWorkItemsTriggered(ROLLBACK_FORM_TO_DIRECT_MANAGER);
+
+		// Assert that the Process is completed
+		Assert.assertEquals(ProcessInstance.STATE_COMPLETED,
+				processInstance.getState());
+
+		// Dispose the knowledge session
+		ksession.dispose();
+	}
+
+	@Test
+	public void testCancel_NoTravel_NoHumanResources_HRDirector() {
+		KieSession ksession = createSession();
+
+		// Add Work item handlers for service and human tasks
+		registerWorkItemHandlers(ksession);
+		// Register Listener for testing purposes
+		ksession.addEventListener(new TestProcessEventListener());
+
+		// Start the process, with approval type ROLLBACK MANAGER
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("approvalType", ApprovalType.ROLLBACK_MANAGER);
+		params.put("requestType", LeaveRequest.Type.CANCEL);
+		params.put("hasTravel", Boolean.FALSE);
+		params.put("requiresHR", Boolean.FALSE);
+		params.put("requiresHRDirector", Boolean.TRUE);
+		ProcessInstance processInstance = ksession.startProcess(HR_PROCESS_ID,
+				params);
+		// Assert process created
+		Assert.assertNotNull(processInstance);
+
+		// Assert that the task "HR Director" has been fired + task in
+		// subprocess: RollbackFormToDirectManager
+		assertWorkItemsTriggered(HR_DIRECTOR, ROLLBACK_FORM_TO_DIRECT_MANAGER);
+
+		// Assert that the Process is completed
+		Assert.assertEquals(ProcessInstance.STATE_COMPLETED,
+				processInstance.getState());
+
+		// Dispose the knowledge session
+		ksession.dispose();
+	}
+
+	@Test
+	public void testCancel_NoTravel_HumanResources_HRDirector() {
+		KieSession ksession = createSession();
+
+		// Add Work item handlers for service and human tasks
+		registerWorkItemHandlers(ksession);
+		// Register Listener for testing purposes
+		ksession.addEventListener(new TestProcessEventListener());
+
+		// Start the process, with approval type ROLLBACK MANAGER
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("approvalType", ApprovalType.ROLLBACK_MANAGER);
+		params.put("requestType", LeaveRequest.Type.CANCEL);
+		params.put("hasTravel", Boolean.FALSE);
+		params.put("requiresHR", Boolean.TRUE);
+		params.put("requiresHRDirector", Boolean.TRUE);
+		ProcessInstance processInstance = ksession.startProcess(HR_PROCESS_ID,
+				params);
+		// Assert process created
+		Assert.assertNotNull(processInstance);
+
+		// Assert that the tasks "Human Resources" and "HR Director" have been
+		// fired + task in subprocess: RollbackFormToDirectManager
+		assertWorkItemsTriggered(HUMAN_RESOURCES, HR_DIRECTOR,
+				ROLLBACK_FORM_TO_DIRECT_MANAGER);
+
+		// Assert that the Process is completed
+		Assert.assertEquals(ProcessInstance.STATE_COMPLETED,
+				processInstance.getState());
+
+		// Dispose the knowledge session
+		ksession.dispose();
+	}
+
+	@Test
+	public void testCancel_NoTravel_HumanResources_NoHRDirector() {
+		KieSession ksession = createSession();
+
+		// Add Work item handlers for service and human tasks
+		registerWorkItemHandlers(ksession);
+		// Register Listener for testing purposes
+		ksession.addEventListener(new TestProcessEventListener());
+
+		// Start the process, with approval type ROLLBACK MANAGER
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("approvalType", ApprovalType.ROLLBACK_MANAGER);
+		params.put("requestType", LeaveRequest.Type.CANCEL);
+		params.put("hasTravel", Boolean.FALSE);
+		params.put("requiresHR", Boolean.TRUE);
+		params.put("requiresHRDirector", Boolean.FALSE);
+		ProcessInstance processInstance = ksession.startProcess(HR_PROCESS_ID,
+				params);
+		// Assert process created
+		Assert.assertNotNull(processInstance);
+
+		// Assert that the task "Human Resources" has been fired + task in
+		// subprocess: RollbackFormToDirectManager
+		assertWorkItemsTriggered(HUMAN_RESOURCES,
+				ROLLBACK_FORM_TO_DIRECT_MANAGER);
+
+		// Assert that the Process is completed
+		Assert.assertEquals(ProcessInstance.STATE_COMPLETED,
+				processInstance.getState());
+
+		// Dispose the knowledge session
+		ksession.dispose();
 	}
 
 	/**
