@@ -74,7 +74,7 @@ end
 
 rule "Update or Cancel of Annual request without salary"
 	when
-		$r:LeaveRequest(status == Status.OPEN, type in (Type.UPDATE, Type.CANCEL), leaveType == LeaveType.ANNUAL, requestPayment == false,
+		$r:LeaveRequest(status == Status.OPEN, type in (Type.MODIFY, Type.CANCEL), leaveType == LeaveType.ANNUAL, requestPayment == false,
 		employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments);
 	then
         System.out.println("Hello " + $r.employee + ". Update/Cancel requests for Annual leaves without salary must be approved by the following Compensation Departments: Vacation, Travel");
@@ -88,7 +88,7 @@ end
 
 rule "Update or Cancel of Annual request with salary"
 	when
-		$r:LeaveRequest(status == Status.OPEN, type in (Type.UPDATE, Type.CANCEL), leaveType == LeaveType.ANNUAL, requestPayment == true,
+		$r:LeaveRequest(status == Status.OPEN, type in (Type.MODIFY, Type.CANCEL), leaveType == LeaveType.ANNUAL, requestPayment == true,
 		employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments);
 	then
         System.out.println("Hello " + $r.employee + ". Update/Cancel requests for Annual leaves with salary must be approved by the following Compensation Departments: Vacation, Travel, Payroll");

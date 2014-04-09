@@ -13,7 +13,7 @@ public class LeaveRequest {
 	}
 	
 	public enum Type {
-		NEW, UPDATE, CANCEL;
+		NEW, MODIFY, CANCEL;
 	}
 
 	private Type type;

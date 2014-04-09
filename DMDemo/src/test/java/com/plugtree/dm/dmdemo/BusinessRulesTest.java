@@ -178,7 +178,7 @@ public class BusinessRulesTest {
 
 		// Operator updates Annual Leave without payment
 		LeaveRequest operatorRequest = createOperatorRequestBuilder(operator,
-				LeaveType.ANNUAL, false).type(Type.UPDATE).build();
+				LeaveType.ANNUAL, false).type(Type.MODIFY).build();
 
 		// Add Globals
 		ksession.setGlobal("vacationDepartment",
@@ -226,7 +226,7 @@ public class BusinessRulesTest {
 
 		// Operator updates Annual Leave with payment
 		LeaveRequest operatorRequest = createOperatorRequestBuilder(operator,
-				LeaveType.ANNUAL, true).type(Type.UPDATE).build();
+				LeaveType.ANNUAL, true).type(Type.MODIFY).build();
 
 		// Add Globals
 		ksession.setGlobal("payrollDepartment", CompensationDepartment.PAYROLL);

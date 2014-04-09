@@ -3,7 +3,7 @@ import org.drools.core.process.core.datatype.impl.type.ObjectDataType;
 
 [
   [
-    "name" : "MPersonnelServicesDirector", 
+    "name" : "HumanResources", 
     "parameters" : [ 
         "MyFirstParam" : new StringDataType(), 
         "MySecondParam" : new StringDataType(), 
@@ -12,7 +12,7 @@ import org.drools.core.process.core.datatype.impl.type.ObjectDataType;
     "results" : [ 
         "Result" : new ObjectDataType("java.util.Map") 
     ], 
-    "displayName" : "M-Personnel Services Director", 
+    "displayName" : "Human Resources", 
     "icon" : "../../../global/defaultservicenodeicon.png" 
   ]
 ]
