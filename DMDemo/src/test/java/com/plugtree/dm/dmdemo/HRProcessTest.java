@@ -5,34 +5,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.drools.core.io.impl.ClassPathResource;
 import org.jbpm.workflow.core.node.WorkItemNode;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.kie.api.KieBase;
-import org.kie.api.KieServices;
-import org.kie.api.builder.KieBuilder;
-import org.kie.api.builder.KieFileSystem;
-import org.kie.api.builder.KieRepository;
-import org.kie.api.builder.Message;
-import org.kie.api.builder.Results;
 import org.kie.api.event.process.ProcessCompletedEvent;
 import org.kie.api.event.process.ProcessEventListener;
 import org.kie.api.event.process.ProcessNodeLeftEvent;
 import org.kie.api.event.process.ProcessNodeTriggeredEvent;
 import org.kie.api.event.process.ProcessStartedEvent;
 import org.kie.api.event.process.ProcessVariableChangedEvent;
-import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.process.ProcessInstance;
-import org.kie.internal.event.KnowledgeRuntimeEventManager;
-import org.kie.internal.logger.KnowledgeRuntimeLoggerFactory;
 
 import com.plugtree.dm.dmdemo.handlers.HRDirectorHandler;
 import com.plugtree.dm.dmdemo.handlers.HumanResourcesHandler;
 import com.plugtree.dm.dmdemo.handlers.RollbackFormToDirectManagerHandler;
 import com.plugtree.dm.dmdemo.handlers.TravelHandler;
+import com.plugtree.util.KieTestHelper;
 
 /**
  * Test Case for the HR Process
@@ -73,7 +63,8 @@ public class HRProcessTest {
 		// Assert process created
 		Assert.assertNotNull(processInstance);
 
-		// Assert that the task "Travel" has been fired + task in subprocess: rollback form to direct manager
+		// Assert that the task "Travel" has been fired + task in subprocess:
+		// rollback form to direct manager
 		assertWorkItemsTriggered(ROLLBACK_FORM_TO_DIRECT_MANAGER, TRAVEL);
 
 		// Assert that the Process is completed
@@ -86,7 +77,8 @@ public class HRProcessTest {
 	}
 
 	/**
-	 * Asserts that the work items that were triggered have the name of the strings sent as parameter
+	 * Asserts that the work items that were triggered have the name of the
+	 * strings sent as parameter
 	 * 
 	 * @param workItemNames
 	 */
@@ -153,38 +145,8 @@ public class HRProcessTest {
 	}
 
 	private KieSession createSession() {
-		// Create a file system to add knowledge to
-		KieServices ks = KieServices.Factory.get();
-		KieRepository kr = ks.getRepository();
-		KieFileSystem kfs = ks.newKieFileSystem();
-		// Add our knowledge
-		kfs.write(new ClassPathResource("HRProcess.bpmn2"));
-		kfs.write(new ClassPathResource("HRVacation.bpmn2"));
-		// Create the Knowledge Builder
-		KieBuilder kbuilder = ks.newKieBuilder(kfs);
-		kbuilder.buildAll();
-		// Check for errors during the compilation of the rules
-		Results results = kbuilder.getResults();
-		List<Message> errors = results.getMessages(Message.Level.ERROR);
-		if (errors.size() > 0) {
-			for (Message error : errors) {
-				System.err.println(error);
-			}
-			throw new IllegalArgumentException("Could not parse knowledge.");
-		}
-		// Create the Knowledge Base
-		KieContainer kcont = ks.newKieContainer(kr.getDefaultReleaseId());
-		KieBase kbase = kcont.newKieBase(null);
-		// Create the StatefulSession using the Knowledge Base that contains
-		// the compiled rules
-		KieSession ksession = kbase.newKieSession();
-
-		// We can add a runtime logger to understand what is going on inside the
-		// Engine
-		KnowledgeRuntimeLoggerFactory
-				.newConsoleLogger((KnowledgeRuntimeEventManager) ksession);
-
-		return ksession;
+		return KieTestHelper.createKieSession("HRProcess.bpmn2",
+				"HRVacation.bpmn2");
 	}
 
 }

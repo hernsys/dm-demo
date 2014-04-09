@@ -16,7 +16,7 @@ import org.kie.api.runtime.KieSession;
 
 import com.plugtree.dm.dmdemo.LeaveRequest.Type;
 import com.plugtree.dm.dmdemo.service.AbsenceService;
-import com.plugtree.util.DroolsTestHelper;
+import com.plugtree.util.KieTestHelper;
 
 public class BusinessRulesTest {
 
@@ -45,7 +45,7 @@ public class BusinessRulesTest {
 		ksession.setGlobal("hrvp", hrvp);
 
 		// Add facts to session
-		DroolsTestHelper.insert(ksession, presidentReq, ceoReq);
+		KieTestHelper.insert(ksession, presidentReq, ceoReq);
 
 		// Fire rules
 		System.out.println("=== FIRING RULES ===");
@@ -88,7 +88,7 @@ public class BusinessRulesTest {
 				CompensationDepartment.VACATION);
 
 		// Add facts to session
-		DroolsTestHelper.insert(ksession, operatorRequest);
+		KieTestHelper.insert(ksession, operatorRequest);
 
 		// Fire rules
 		System.out.println("=== FIRING RULES ===");
@@ -134,7 +134,7 @@ public class BusinessRulesTest {
 		ksession.setGlobal("travelDepartment", CompensationDepartment.TRAVEL);
 
 		// Add facts to session
-		DroolsTestHelper.insert(ksession, operatorRequest);
+		KieTestHelper.insert(ksession, operatorRequest);
 
 		// Fire rules
 		System.out.println("=== FIRING RULES ===");
@@ -186,7 +186,7 @@ public class BusinessRulesTest {
 		ksession.setGlobal("travelDepartment", CompensationDepartment.TRAVEL);
 
 		// Add facts to session
-		DroolsTestHelper.insert(ksession, operatorRequest);
+		KieTestHelper.insert(ksession, operatorRequest);
 
 		// Fire rules
 		System.out.println("=== FIRING RULES ===");
@@ -235,7 +235,7 @@ public class BusinessRulesTest {
 		ksession.setGlobal("travelDepartment", CompensationDepartment.TRAVEL);
 
 		// Add facts to session
-		DroolsTestHelper.insert(ksession, operatorRequest);
+		KieTestHelper.insert(ksession, operatorRequest);
 
 		// Fire rules
 		System.out.println("=== FIRING RULES ===");
@@ -287,7 +287,7 @@ public class BusinessRulesTest {
 		ksession.setGlobal("travelDepartment", CompensationDepartment.TRAVEL);
 
 		// Add facts to session
-		DroolsTestHelper.insert(ksession, operatorRequest);
+		KieTestHelper.insert(ksession, operatorRequest);
 
 		// Fire rules
 		System.out.println("=== FIRING RULES ===");
@@ -336,7 +336,7 @@ public class BusinessRulesTest {
 		ksession.setGlobal("travelDepartment", CompensationDepartment.TRAVEL);
 
 		// Add facts to session
-		DroolsTestHelper.insert(ksession, operatorRequest);
+		KieTestHelper.insert(ksession, operatorRequest);
 
 		// Fire rules
 		System.out.println("=== FIRING RULES ===");
@@ -392,7 +392,7 @@ public class BusinessRulesTest {
 				CompensationDepartment.VACATION);
 
 		// Add facts to session
-		DroolsTestHelper.insert(ksession, operatorRequest);
+		KieTestHelper.insert(ksession, operatorRequest);
 
 		// Fire rules
 		System.out.println("=== FIRING RULES ===");
@@ -444,7 +444,7 @@ public class BusinessRulesTest {
 				CompensationDepartment.VACATION);
 
 		// Add facts to session
-		DroolsTestHelper.insert(ksession, operatorRequest);
+		KieTestHelper.insert(ksession, operatorRequest);
 
 		// Fire rules
 		System.out.println("=== FIRING RULES ===");
@@ -502,7 +502,7 @@ public class BusinessRulesTest {
 		ksession.setGlobal("payrollDepartment", CompensationDepartment.PAYROLL);
 
 		// Add facts to session
-		DroolsTestHelper.insert(ksession, operatorRequest);
+		KieTestHelper.insert(ksession, operatorRequest);
 
 		// Fire rules
 		System.out.println("=== FIRING RULES ===");
@@ -569,7 +569,7 @@ public class BusinessRulesTest {
 		ksession.setGlobal("payrollDepartment", CompensationDepartment.PAYROLL);
 
 		// Add facts to session
-		DroolsTestHelper.insert(ksession, operatorRequest);
+		KieTestHelper.insert(ksession, operatorRequest);
 
 		// Fire rules
 		System.out.println("=== FIRING RULES ===");
@@ -629,7 +629,7 @@ public class BusinessRulesTest {
 				CompensationDepartment.VACATION);
 
 		// Add facts to session
-		DroolsTestHelper.insert(ksession, operatorRequest);
+		KieTestHelper.insert(ksession, operatorRequest);
 
 		// Fire rules
 		System.out.println("=== FIRING RULES ===");
@@ -678,7 +678,7 @@ public class BusinessRulesTest {
 				CompensationDepartment.VACATION);
 
 		// Add facts to session
-		DroolsTestHelper.insert(ksession, operatorRequest);
+		KieTestHelper.insert(ksession, operatorRequest);
 
 		// Fire rules
 		System.out.println("=== FIRING RULES ===");
@@ -727,7 +727,7 @@ public class BusinessRulesTest {
 				CompensationDepartment.VACATION);
 
 		// Add facts to session
-		DroolsTestHelper.insert(ksession, operatorRequest);
+		KieTestHelper.insert(ksession, operatorRequest);
 
 		// Fire rules
 		System.out.println("=== FIRING RULES ===");
@@ -770,8 +770,7 @@ public class BusinessRulesTest {
 						"My very good reasons");
 	}
 
-	private Employee createOperator(AtomicInteger id,
-			Employee directSupervisor) {
+	private Employee createOperator(AtomicInteger id, Employee directSupervisor) {
 		return new Employee.Builder(id.getAndIncrement(), "John")
 				.basicSalary(BigDecimal.valueOf(1000)).email("john@mail.com")
 
@@ -851,7 +850,7 @@ public class BusinessRulesTest {
 
 	private KieSession createKieSession(String drlFile,
 			final List<String> firedRules) throws Exception {
-		KieSession ksession = DroolsTestHelper.createKieSession(drlFile);
+		KieSession ksession = KieTestHelper.createKieSession(drlFile);
 
 		if (firedRules != null) {
 			ksession.addEventListener(new DefaultAgendaEventListener() {
