@@ -57,7 +57,7 @@ public class HRVacationProcessTest {
 	public void testRollbackToDirectManager() {
 		KieSession ksession = createSession();
 
-		// Add Work item handlers for service and human tasks
+		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
 		// Register Listener for testing purposes
 		ksession.addEventListener(new TestProcessEventListener());
@@ -89,7 +89,7 @@ public class HRVacationProcessTest {
 	public void testRollbackToRequestor() {
 		KieSession ksession = createSession();
 
-		// Add Work item handlers for service and human tasks
+		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
 		// Register Listener for testing purposes
 		ksession.addEventListener(new TestProcessEventListener());
@@ -119,7 +119,7 @@ public class HRVacationProcessTest {
 	public void testRejected() {
 		KieSession ksession = createSession();
 
-		// Add Work item handlers for service and human tasks
+		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
 		// Register Listener for testing purposes
 		ksession.addEventListener(new TestProcessEventListener());
@@ -149,7 +149,7 @@ public class HRVacationProcessTest {
 	public void testApproved_NotExecutive_AddVacation_Payroll_Travel() {
 		KieSession ksession = createSession();
 
-		// Add Work item handlers for service and human tasks
+		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
 		// Payroll task -- TODO: Name should be 'Payroll', no 'Human Task'
 		TestAsyncWorkItemHandler payrollHandler = new TestAsyncWorkItemHandler();
@@ -206,7 +206,7 @@ public class HRVacationProcessTest {
 	public void testApproved_NotExecutive_AddVacation_NoPayroll_Travel() {
 		KieSession ksession = createSession();
 
-		// Add Work item handlers for service and human tasks
+		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
 		// Register Listener for testing purposes
 		ksession.addEventListener(new TestProcessEventListener());
@@ -240,7 +240,7 @@ public class HRVacationProcessTest {
 	public void testApproved_NotExecutive_AddVacation_NoPayroll_NotTravel() {
 		KieSession ksession = createSession();
 
-		// Add Work item handlers for service and human tasks
+		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
 		// Register Listener for testing purposes
 		ksession.addEventListener(new TestProcessEventListener());
@@ -276,7 +276,7 @@ public class HRVacationProcessTest {
 	public void testApproved_NotExecutive_CancelVacation_NoPayroll_Travel() {
 		KieSession ksession = createSession();
 
-		// Add Work item handlers for service and human tasks
+		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
 		// Register Listener for testing purposes
 		ksession.addEventListener(new TestProcessEventListener());
@@ -310,7 +310,7 @@ public class HRVacationProcessTest {
 	public void testApproved_NotExecutive_CancelVacation_NoPayroll_NoTravel() {
 		KieSession ksession = createSession();
 
-		// Add Work item handlers for service and human tasks
+		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
 		// Register Listener for testing purposes
 		ksession.addEventListener(new TestProcessEventListener());
@@ -346,7 +346,7 @@ public class HRVacationProcessTest {
 	public void testApproved_NotExecutive_ModifyVacation_NoPayroll_Travel() {
 		KieSession ksession = createSession();
 
-		// Add Work item handlers for service and human tasks
+		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
 		// Register Listener for testing purposes
 		ksession.addEventListener(new TestProcessEventListener());
@@ -380,7 +380,7 @@ public class HRVacationProcessTest {
 	public void testApproved_NotExecutive_ModifyVacation_NoPayroll_NoTravel() {
 		KieSession ksession = createSession();
 
-		// Add Work item handlers for service and human tasks
+		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
 		// Register Listener for testing purposes
 		ksession.addEventListener(new TestProcessEventListener());
@@ -416,7 +416,7 @@ public class HRVacationProcessTest {
 	public void testApproved_Executive_NoPayroll_NoTravel() {
 		KieSession ksession = createSession();
 
-		// Add Work item handlers for service and human tasks
+		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
 		// Register Listener for testing purposes
 		ksession.addEventListener(new TestProcessEventListener());
@@ -449,7 +449,7 @@ public class HRVacationProcessTest {
 	public void testApproved_Executive_NoPayroll_Travel() {
 		KieSession ksession = createSession();
 
-		// Add Work item handlers for service and human tasks
+		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
 		// Register Listener for testing purposes
 		ksession.addEventListener(new TestProcessEventListener());
@@ -481,7 +481,7 @@ public class HRVacationProcessTest {
 	public void testApproved_Executive_Payroll_Travel() {
 		KieSession ksession = createSession();
 
-		// Add Work item handlers for service and human tasks
+		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
 		// Payroll task -- TODO: Name should be 'Payroll', no 'Human Task'
 		TestAsyncWorkItemHandler payrollHandler = new TestAsyncWorkItemHandler();
