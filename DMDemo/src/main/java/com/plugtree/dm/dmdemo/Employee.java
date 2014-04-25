@@ -1,10 +1,12 @@
 package com.plugtree.dm.dmdemo;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-public class Employee {
+public class Employee implements Serializable {
+	private static final long serialVersionUID = 3530699043991434501L;
 	private Integer id;
 	private String name;
 	private String phone;

@@ -1,5 +1,6 @@
 package com.plugtree.dm.dmdemo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -7,11 +8,13 @@ import java.util.List;
 import org.kie.api.definition.type.PropertyReactive;
 
 @PropertyReactive
-public class LeaveRequest {
+public class LeaveRequest implements Serializable {
+	private static final long serialVersionUID = 5204988403115488828L;
+
 	public enum Status {
 		OPEN, COMPLETE, CLOSED;
 	}
-	
+
 	public enum Type {
 		NEW, MODIFY, CANCEL;
 	}
@@ -33,13 +36,14 @@ public class LeaveRequest {
 	private AbsenceReason absenceReason;
 	private String comments;
 	private Status status = Status.OPEN;
+	private List<LeaveApproval> approvals = new ArrayList<LeaveApproval>();
 	private List<Employee> approvers = new ArrayList<Employee>();
 	private List<CompensationDepartment> compensationDepartments = new ArrayList<CompensationDepartment>();
-	
+
 	public LeaveRequest() {
-		
+
 	}
-	
+
 	public LeaveRequest(Builder builder) {
 		this.employee = builder.employee;
 		this.substitute = builder.substitute;
@@ -55,18 +59,16 @@ public class LeaveRequest {
 		this.type = builder.type;
 	}
 
-	public boolean addApprover(Employee a) {
-		return approvers.add(a);
-	}
-	
-	public boolean removeCompensationDepartment(CompensationDepartment compensationDepartment) {
+	public boolean removeCompensationDepartment(
+			CompensationDepartment compensationDepartment) {
 		return compensationDepartments.remove(compensationDepartment);
 	}
 
-	public boolean addCompensationDepartment(CompensationDepartment compensationDepartment) {
+	public boolean addCompensationDepartment(
+			CompensationDepartment compensationDepartment) {
 		return compensationDepartments.add(compensationDepartment);
 	}
-	
+
 	public boolean removeApprover(Employee a) {
 		return approvers.remove(a);
 	}
@@ -174,9 +176,30 @@ public class LeaveRequest {
 	public void setStatus(Status status) {
 		this.status = status;
 	}
-	
-	
-	
+
+	public List<LeaveApproval> getApprovals() {
+		return approvals;
+	}
+
+	public void setApprovals(List<LeaveApproval> approvals) {
+		this.approvals = approvals;
+	}
+
+	public boolean addApproval(LeaveApproval approval) {
+		return approvals.add(approval);
+	}
+
+	public boolean hasPendingApprovals() {
+		boolean hasPendingApprovals = false;
+		for (LeaveApproval a : approvals) {
+			if (ApprovalType.PENDING.equals(a.getType())) {
+				hasPendingApprovals = true;
+				break;
+			}
+		}
+		return hasPendingApprovals;
+	}
+
 	public List<Employee> getApprovers() {
 		return approvers;
 	}
@@ -185,7 +208,9 @@ public class LeaveRequest {
 		this.approvers = approvers;
 	}
 
-
+	public boolean addApprover(Employee a) {
+		return approvers.add(a);
+	}
 
 	public List<CompensationDepartment> getCompensationDepartments() {
 		return compensationDepartments;
@@ -195,8 +220,6 @@ public class LeaveRequest {
 			List<CompensationDepartment> compensationDepartments) {
 		this.compensationDepartments = compensationDepartments;
 	}
-
-
 
 	public static class Builder {
 		private Employee employee;
@@ -218,7 +241,7 @@ public class LeaveRequest {
 			this.leaveType = leaveType;
 			this.requestPayment = requestPayment;
 		}
-		
+
 		public LeaveRequest build() {
 			return new LeaveRequest(this);
 		}

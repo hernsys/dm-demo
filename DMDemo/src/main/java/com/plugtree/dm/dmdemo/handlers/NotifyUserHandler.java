@@ -3,20 +3,17 @@ package com.plugtree.dm.dmdemo.handlers;
 import org.kie.api.runtime.process.WorkItem;
 import org.kie.api.runtime.process.WorkItemHandler;
 import org.kie.api.runtime.process.WorkItemManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * WorkItemHandler for the Service Task "Display Error Report"
+ * WorkItemHandler for the Service Task "Notify User"
  * 
  * @author Ezequiel Grande
- *
+ * 
  */
-public class DisplayErrorReportHandler implements WorkItemHandler {
-	private Logger logger = LoggerFactory.getLogger(DisplayErrorReportHandler.class);
-	
+public class NotifyUserHandler implements WorkItemHandler {
+
 	public void executeWorkItem(WorkItem workItem, WorkItemManager manager) {
-		logger.info("====> Displaying error report...");
+		System.out.println("====> Notifying user...");
 		manager.completeWorkItem(workItem.getId(), null);
 	}
 

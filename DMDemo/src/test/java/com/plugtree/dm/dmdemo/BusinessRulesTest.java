@@ -752,6 +752,20 @@ public class BusinessRulesTest {
 		ksession.dispose();
 	}
 
+	@Test
+	public void testSupervisor() {
+		AtomicInteger id = new AtomicInteger();
+
+		// Create Company hierarchy
+		Employee president = createPresident(id);
+		Employee ceo = createCEO(id, "NameOfVP_1", president);
+		Employee operator = createOperator(id, ceo);
+
+		Assert.assertEquals(ceo, operator.getSupervisor(Role.EXECUTIVE));
+		Assert.assertEquals(president, operator.getSupervisor(Role.PRESIDENT));
+		Assert.assertNull(operator.getSupervisor(Role.GENERAL_MANAGER));
+	}
+
 	/*
 	 * ============== HELPER METHODS ==============
 	 */
@@ -861,19 +875,5 @@ public class BusinessRulesTest {
 			});
 		}
 		return ksession;
-	}
-
-	@Test
-	public void testSupervisor() {
-		AtomicInteger id = new AtomicInteger();
-
-		// Create Company hierarchy
-		Employee president = createPresident(id);
-		Employee ceo = createCEO(id, "NameOfVP_1", president);
-		Employee operator = createOperator(id, ceo);
-
-		Assert.assertEquals(ceo, operator.getSupervisor(Role.EXECUTIVE));
-		Assert.assertEquals(president, operator.getSupervisor(Role.PRESIDENT));
-		Assert.assertNull(operator.getSupervisor(Role.GENERAL_MANAGER));
 	}
 }
