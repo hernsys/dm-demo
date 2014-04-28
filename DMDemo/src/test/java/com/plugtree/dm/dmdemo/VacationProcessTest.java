@@ -37,6 +37,7 @@ import org.kie.api.runtime.manager.RuntimeManagerFactory;
 import org.kie.api.runtime.process.ProcessInstance;
 import org.kie.api.runtime.process.WorkflowProcessInstance;
 import org.kie.api.task.TaskService;
+import org.kie.api.task.model.Status;
 import org.kie.api.task.model.Task;
 import org.kie.api.task.model.TaskSummary;
 import org.kie.internal.io.ResourceFactory;
@@ -62,6 +63,7 @@ import com.plugtree.util.KieTestHelper;
  * 
  */
 public class VacationProcessTest {
+	private static final String HUMAN_TASK = "Human Task";
 	private static final Logger logger = LoggerFactory
 			.getLogger(VacationProcessTest.class);
 	private static final String VACATION_PROCESS_ID = "DMDemo.VacationProcess";
@@ -264,8 +266,7 @@ public class VacationProcessTest {
 		registerWorkItemHandlers(ksession);
 		LocalHTWorkItemHandler htHandler = new LocalHTWorkItemHandler();
 		htHandler.setRuntimeManager(manager);
-		// Human tasks -- TODO: Review name
-		ksession.getWorkItemManager().registerWorkItemHandler("Human Task",
+		ksession.getWorkItemManager().registerWorkItemHandler(HUMAN_TASK,
 				htHandler);
 
 		// Register Listener for testing purposes
@@ -321,13 +322,28 @@ public class VacationProcessTest {
 		List<TaskSummary> johnTasks = taskService
 				.getTasksAssignedAsPotentialOwner("john", "en-UK");
 		Assert.assertEquals(1, johnTasks.size());
+		// Refresh task data
 		Task johnTask = taskService.getTaskById(johnTasks.get(0).getId());
+		Assert.assertEquals(Status.Ready, johnTask.getTaskData().getStatus());
+		// Claim the Task
 		taskService.claim(johnTask.getId(), "john");
+		// Refresh task data
+		johnTask = taskService.getTaskById(johnTasks.get(0).getId());
+		Assert.assertEquals(Status.Reserved, johnTask.getTaskData().getStatus());
+		// Start the task
 		taskService.start(johnTask.getId(), "john");
+		// Refresh task data
+		johnTask = taskService.getTaskById(johnTasks.get(0).getId());
+		Assert.assertEquals(Status.InProgress, johnTask.getTaskData()
+				.getStatus());
 		taskService.complete(johnTask.getId(), "john", null);
+		// Refresh task data
+		johnTask = taskService.getTaskById(johnTasks.get(0).getId());
+		Assert.assertEquals(Status.Completed, johnTask.getTaskData()
+				.getStatus());
 
 		// TODO: Continue human task
-		
+
 		manager.disposeRuntimeEngine(engine);
 	}
 
