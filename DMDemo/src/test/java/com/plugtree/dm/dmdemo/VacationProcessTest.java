@@ -219,10 +219,18 @@ public class VacationProcessTest {
 	public void testManagerApprovalHumanTask() {
 		logger.info("======== Test Case: Manager Approval Human Task ========");
 
-		Properties userGroups = new Properties();
-		userGroups.put("john", "approvers");
+		AtomicInteger id = new AtomicInteger(1);
+		// Create Company hierarchy
+		Employee president = createPresident(id);
+		Employee ceo = createCEO(id, "NameOfVP_1", president);
+		Employee operator = createOperator(id, ceo);
 
-		// first configure environment that will be used by RuntimeManager
+		// Register the users so they can claim human tasks
+		Properties userGroups = new Properties();
+		userGroups.put(String.valueOf(president.getId()), "approvers");
+		userGroups.put(String.valueOf(ceo.getId()), "approvers");
+
+		// Environment Configuration
 		RuntimeEnvironment environment = RuntimeEnvironmentBuilder.Factory
 				.get()
 				.newDefaultInMemoryBuilder()
@@ -243,17 +251,11 @@ public class VacationProcessTest {
 						ResourceType.BPMN2)
 				.addAsset(ResourceFactory.newClassPathResource("vacation.drl"),
 						ResourceType.DRL).get();
-		// next create RuntimeManager - in this case singleton strategy is
-		// chosen
+		// Manager and Engine Configuration
 		RuntimeManager manager = RuntimeManagerFactory.Factory.get()
 				.newSingletonRuntimeManager(environment);
-		// then get RuntimeEngine out of manager - using empty context as
-		// singleton does not keep track
-		// of runtime engine as there is only one
 		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
-		// get KieSession from runtime runtimeEngine - already initialized with
-		// all handlers, listeners, etc that were configured
-		// on the environment
+		// Retrieve Service and Session
 		TaskService taskService = engine.getTaskService();
 		final KieSession ksession = engine.getKieSession();
 
@@ -272,12 +274,6 @@ public class VacationProcessTest {
 		// Register Listener for testing purposes
 		ksession.addEventListener(new TestProcessEventListener());
 		addEventListenerRuleflowGroup(ksession);
-
-		AtomicInteger id = new AtomicInteger(1);
-		// Create Company hierarchy
-		Employee president = createPresident(id);
-		Employee ceo = createCEO(id, "NameOfVP_1", president);
-		Employee operator = createOperator(id, ceo);
 
 		// Operator requests Annual Leave without payment
 		LeaveRequest operatorRequest = createOperatorRequestBuilder(operator,
@@ -319,28 +315,32 @@ public class VacationProcessTest {
 		Assert.assertEquals("State is not Active",
 				ProcessInstance.STATE_ACTIVE, processInstance.getState());
 
-		List<TaskSummary> johnTasks = taskService
-				.getTasksAssignedAsPotentialOwner("john", "en-UK");
-		Assert.assertEquals(1, johnTasks.size());
-		// Refresh task data
-		Task johnTask = taskService.getTaskById(johnTasks.get(0).getId());
-		Assert.assertEquals(Status.Ready, johnTask.getTaskData().getStatus());
-		// Claim the Task
-		taskService.claim(johnTask.getId(), "john");
-		// Refresh task data
-		johnTask = taskService.getTaskById(johnTasks.get(0).getId());
-		Assert.assertEquals(Status.Reserved, johnTask.getTaskData().getStatus());
+		// The Operator has requested a leave, and his direct supervisor will
+		// work on the human task
+		String approverId = String.valueOf(operator.getDirectSupervisor().getId());
+		List<TaskSummary> approvalTasksSum = taskService
+				.getTasksOwned(approverId, "en-UK");
+		Assert.assertEquals("Direct Supervisor does not have one available task for him", 1,
+				approvalTasksSum.size());
+		// Get Task
+		Task approvalTask = taskService.getTaskById(approvalTasksSum.get(0).getId());
+		// The task should be already reserved to the Direct Supervisor
+		Assert.assertEquals(
+				"Approval Task is not Reserved",
+				Status.Reserved, approvalTask.getTaskData().getStatus());
 		// Start the task
-		taskService.start(johnTask.getId(), "john");
+		taskService.start(approvalTask.getId(), approverId);
 		// Refresh task data
-		johnTask = taskService.getTaskById(johnTasks.get(0).getId());
-		Assert.assertEquals(Status.InProgress, johnTask.getTaskData()
-				.getStatus());
-		taskService.complete(johnTask.getId(), "john", null);
+		approvalTask = taskService.getTaskById(approvalTasksSum.get(0).getId());
+		Assert.assertEquals(
+				"After starting Approval Task, it's status is not In Progress",
+				Status.InProgress, approvalTask.getTaskData().getStatus());
+		taskService.complete(approvalTask.getId(), approverId, null);
 		// Refresh task data
-		johnTask = taskService.getTaskById(johnTasks.get(0).getId());
-		Assert.assertEquals(Status.Completed, johnTask.getTaskData()
-				.getStatus());
+		approvalTask = taskService.getTaskById(approvalTasksSum.get(0).getId());
+		Assert.assertEquals(
+				"After starting Approval Task, it's status is not Completed",
+				Status.Completed, approvalTask.getTaskData().getStatus());
 
 		// TODO: Continue human task
 
