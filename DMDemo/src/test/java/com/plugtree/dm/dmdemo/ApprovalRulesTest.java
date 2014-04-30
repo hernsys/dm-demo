@@ -2,39 +2,100 @@ package com.plugtree.dm.dmdemo;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Assert;
 
 import org.drools.core.util.DateUtils;
+import org.jbpm.bpmn2.xml.XmlBPMNProcessDumper;
+import org.jbpm.ruleflow.core.RuleFlowProcess;
+import org.jbpm.ruleflow.core.RuleFlowProcessFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kie.api.event.rule.AfterMatchFiredEvent;
 import org.kie.api.event.rule.DefaultAgendaEventListener;
+import org.kie.api.event.rule.MatchCreatedEvent;
+import org.kie.api.event.rule.RuleFlowGroupActivatedEvent;
+import org.kie.api.io.Resource;
+import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.manager.RuntimeEngine;
+import org.kie.api.runtime.manager.RuntimeEnvironment;
+import org.kie.api.runtime.manager.RuntimeEnvironmentBuilder;
+import org.kie.api.runtime.manager.RuntimeManager;
+import org.kie.api.runtime.manager.RuntimeManagerFactory;
+import org.kie.api.runtime.process.ProcessInstance;
+import org.kie.api.runtime.process.WorkflowProcessInstance;
+import org.kie.internal.io.ResourceFactory;
+import org.kie.internal.runtime.manager.context.EmptyContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.plugtree.dm.dmdemo.LeaveRequest.Type;
 import com.plugtree.dm.dmdemo.service.AbsenceService;
-import com.plugtree.util.KieTestHelper;
 
-public class BusinessRulesTest {
+/**
+ * Test Cases for the Approval Rules
+ * 
+ * @author Ezequiel Grande
+ * 
+ */
+public class ApprovalRulesTest {
+	private Logger logger = LoggerFactory.getLogger(ApprovalRulesTest.class);
+	private static final String SELECT_APPROVERS_RFG = "select-approvers";
+	private static final String VACATION_DRL = "vacation.drl";
+	private static final String MOCK_PROCESS_ID = "com.plugtree.dm.mock.approvers";
+	private static RuntimeManager manager;
 
 	@BeforeClass
 	public static void init() {
 		System.setProperty("drools.dateformat", "yyyyMMdd");
+		manager = createRuntimeManager();
 	}
 
 	@Test
-	public void testPresidentAndExecutiveRequests() throws Exception {
+	public void testPresidentRequest() throws Exception {
 		AtomicInteger id = new AtomicInteger(1);
-		List<String> firedRules = new ArrayList<String>();
-		KieSession ksession = this
-				.createKieSession("approvers.drl", firedRules);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
 
 		// President requests Marriage Leave without payment
 		Employee president = createPresident(id);
 		LeaveRequest presidentReq = createPresidentLeave(president);
+
+		// Add Globals
+		Employee hrvp = createHRVP(id, president);
+		ksession.setGlobal("hrvp", hrvp);
+
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, presidentReq);
+
+		// Assert that one rule was fired
+		Assert.assertEquals(1, firedRules.size());
+
+		// Assert President rule was triggered, the HR VP will approve his leave
+		Assert.assertEquals(1, presidentReq.getApprovals().size());
+		Assert.assertEquals(hrvp, presidentReq.getApprovals().get(0)
+				.getApprover());
+
+		// Dispose session
+		manager.disposeRuntimeEngine(engine);
+	}
+
+	@Test
+	public void testExecutiveRequest() throws Exception {
+		AtomicInteger id = new AtomicInteger(1);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
+
+		// Create the President of the Company
+		Employee president = createPresident(id);
 
 		// CEO requests Paternity Leave without payment
 		Employee ceo = createCEO(id, "NameOfVP_1", president);
@@ -44,35 +105,27 @@ public class BusinessRulesTest {
 		Employee hrvp = createHRVP(id, president);
 		ksession.setGlobal("hrvp", hrvp);
 
-		// Add facts to session
-		KieTestHelper.insert(ksession, presidentReq, ceoReq);
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, ceoReq);
 
-		// Fire rules
-		System.out.println("=== FIRING RULES ===");
-		ksession.fireAllRules();
-
-		// Assert that two rules were fired
-		Assert.assertEquals(3, firedRules.size());
-
-		// Assert President rule was triggered, the HR VP will approve his leave
-		Assert.assertEquals(1, presidentReq.getApprovers().size());
-		Assert.assertEquals(hrvp, presidentReq.getApprovers().get(0));
+		// Assert that two rule were fired
+		Assert.assertEquals(2, firedRules.size());
 
 		// Assert CEO rule was triggered, the President will approve his leave
-		Assert.assertEquals(1, ceoReq.getApprovers().size());
-		Assert.assertEquals(president, ceoReq.getApprovers().get(0));
+		Assert.assertEquals(1, ceoReq.getApprovals().size());
+		Assert.assertEquals(president, ceoReq.getApprovals().get(0)
+				.getApprover());
 
 		// Dispose session
-		ksession.dispose();
-
+		manager.disposeRuntimeEngine(engine);
 	}
 
 	@Test
 	public void testAnnualWithOutSalary() throws Exception {
 		AtomicInteger id = new AtomicInteger(1);
-		List<String> firedRules = new ArrayList<String>();
-		KieSession ksession = this
-				.createKieSession("approvers.drl", firedRules);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
 
 		// Create Company hierarchy
 		Employee president = createPresident(id);
@@ -87,16 +140,12 @@ public class BusinessRulesTest {
 		ksession.setGlobal("vacationDepartment",
 				CompensationDepartment.VACATION);
 
-		// Add facts to session
-		KieTestHelper.insert(ksession, operatorRequest);
-
-		// Fire rules
-		System.out.println("=== FIRING RULES ===");
-		ksession.fireAllRules();
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, operatorRequest);
 
 		// Assert that two rules were fired
 		Assert.assertEquals(2, firedRules.size());
-		assertSupervisorIsApprover(operator, operatorRequest);
+		assertSupervisorIsApprover(operatorRequest, operator);
 
 		// Assert that the Vacation Department will review his request
 		Assert.assertFalse(operatorRequest.getCompensationDepartments()
@@ -107,16 +156,15 @@ public class BusinessRulesTest {
 				.contains(CompensationDepartment.VACATION));
 
 		// Dispose session
-		ksession.dispose();
-
+		manager.disposeRuntimeEngine(engine);
 	}
 
 	@Test
 	public void testAnnualWithSalary() throws Exception {
 		AtomicInteger id = new AtomicInteger(1);
-		List<String> firedRules = new ArrayList<String>();
-		KieSession ksession = this
-				.createKieSession("approvers.drl", firedRules);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
 
 		// Create Company hierarchy
 		Employee president = createPresident(id);
@@ -133,18 +181,14 @@ public class BusinessRulesTest {
 				CompensationDepartment.VACATION);
 		ksession.setGlobal("travelDepartment", CompensationDepartment.TRAVEL);
 
-		// Add facts to session
-		KieTestHelper.insert(ksession, operatorRequest);
-
-		// Fire rules
-		System.out.println("=== FIRING RULES ===");
-		ksession.fireAllRules();
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, operatorRequest);
 
 		// Assert that two rules were fired
 		Assert.assertEquals(2, firedRules.size());
 
 		// Assert that his supervisor will approve the request
-		assertSupervisorIsApprover(operator, operatorRequest);
+		assertSupervisorIsApprover(operatorRequest, operator);
 
 		// Assert that the Vacation, Travel and Payroll Departments will review
 		// his request
@@ -160,16 +204,15 @@ public class BusinessRulesTest {
 				.contains(CompensationDepartment.PAYROLL));
 
 		// Dispose session
-		ksession.dispose();
-
+		manager.disposeRuntimeEngine(engine);
 	}
 
 	@Test
 	public void testUpdateAnnualWithOutSalary() throws Exception {
 		AtomicInteger id = new AtomicInteger(1);
-		List<String> firedRules = new ArrayList<String>();
-		KieSession ksession = this
-				.createKieSession("approvers.drl", firedRules);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
 
 		// Create Company hierarchy
 		Employee president = createPresident(id);
@@ -185,16 +228,12 @@ public class BusinessRulesTest {
 				CompensationDepartment.VACATION);
 		ksession.setGlobal("travelDepartment", CompensationDepartment.TRAVEL);
 
-		// Add facts to session
-		KieTestHelper.insert(ksession, operatorRequest);
-
-		// Fire rules
-		System.out.println("=== FIRING RULES ===");
-		ksession.fireAllRules();
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, operatorRequest);
 
 		// Assert that two rules were fired
 		Assert.assertEquals(2, firedRules.size());
-		assertSupervisorIsApprover(operator, operatorRequest);
+		assertSupervisorIsApprover(operatorRequest, operator);
 
 		// Assert that the Vacation and Travel Departments will review his
 		// request
@@ -208,16 +247,15 @@ public class BusinessRulesTest {
 				.contains(CompensationDepartment.TRAVEL));
 
 		// Dispose session
-		ksession.dispose();
-
+		manager.disposeRuntimeEngine(engine);
 	}
 
 	@Test
 	public void testUpdateAnnualWithSalary() throws Exception {
 		AtomicInteger id = new AtomicInteger(1);
-		List<String> firedRules = new ArrayList<String>();
-		KieSession ksession = this
-				.createKieSession("approvers.drl", firedRules);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
 
 		// Create Company hierarchy
 		Employee president = createPresident(id);
@@ -234,18 +272,14 @@ public class BusinessRulesTest {
 				CompensationDepartment.VACATION);
 		ksession.setGlobal("travelDepartment", CompensationDepartment.TRAVEL);
 
-		// Add facts to session
-		KieTestHelper.insert(ksession, operatorRequest);
-
-		// Fire rules
-		System.out.println("=== FIRING RULES ===");
-		ksession.fireAllRules();
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, operatorRequest);
 
 		// Assert that two rules were fired
 		Assert.assertEquals(2, firedRules.size());
 
 		// Assert that his supervisor will approve the request
-		assertSupervisorIsApprover(operator, operatorRequest);
+		assertSupervisorIsApprover(operatorRequest, operator);
 
 		// Assert that the Vacation, Travel and Payroll Departments will review
 		// his request
@@ -261,16 +295,15 @@ public class BusinessRulesTest {
 				.contains(CompensationDepartment.PAYROLL));
 
 		// Dispose session
-		ksession.dispose();
-
+		manager.disposeRuntimeEngine(engine);
 	}
 
 	@Test
 	public void testCancelAnnualWithOutSalary() throws Exception {
 		AtomicInteger id = new AtomicInteger(1);
-		List<String> firedRules = new ArrayList<String>();
-		KieSession ksession = this
-				.createKieSession("approvers.drl", firedRules);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
 
 		// Create Company hierarchy
 		Employee president = createPresident(id);
@@ -286,16 +319,12 @@ public class BusinessRulesTest {
 				CompensationDepartment.VACATION);
 		ksession.setGlobal("travelDepartment", CompensationDepartment.TRAVEL);
 
-		// Add facts to session
-		KieTestHelper.insert(ksession, operatorRequest);
-
-		// Fire rules
-		System.out.println("=== FIRING RULES ===");
-		ksession.fireAllRules();
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, operatorRequest);
 
 		// Assert that two rules were fired
 		Assert.assertEquals(2, firedRules.size());
-		assertSupervisorIsApprover(operator, operatorRequest);
+		assertSupervisorIsApprover(operatorRequest, operator);
 
 		// Assert that the Vacation and Travel Departments will review his
 		// request
@@ -309,16 +338,15 @@ public class BusinessRulesTest {
 				.contains(CompensationDepartment.TRAVEL));
 
 		// Dispose session
-		ksession.dispose();
-
+		manager.disposeRuntimeEngine(engine);
 	}
 
 	@Test
 	public void testCancelAnnualWithSalary() throws Exception {
 		AtomicInteger id = new AtomicInteger(1);
-		List<String> firedRules = new ArrayList<String>();
-		KieSession ksession = this
-				.createKieSession("approvers.drl", firedRules);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
 
 		// Create Company hierarchy
 		Employee president = createPresident(id);
@@ -335,18 +363,14 @@ public class BusinessRulesTest {
 				CompensationDepartment.VACATION);
 		ksession.setGlobal("travelDepartment", CompensationDepartment.TRAVEL);
 
-		// Add facts to session
-		KieTestHelper.insert(ksession, operatorRequest);
-
-		// Fire rules
-		System.out.println("=== FIRING RULES ===");
-		ksession.fireAllRules();
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, operatorRequest);
 
 		// Assert that two rules were fired
 		Assert.assertEquals(2, firedRules.size());
 
 		// Assert that his supervisor will approve the request
-		assertSupervisorIsApprover(operator, operatorRequest);
+		assertSupervisorIsApprover(operatorRequest, operator);
 
 		// Assert that the Vacation, Travel and Payroll Departments will review
 		// his request
@@ -362,16 +386,15 @@ public class BusinessRulesTest {
 				.contains(CompensationDepartment.PAYROLL));
 
 		// Dispose session
-		ksession.dispose();
-
+		manager.disposeRuntimeEngine(engine);
 	}
 
 	@Test
 	public void testEducationWithoutSalary() throws Exception {
 		AtomicInteger id = new AtomicInteger(1);
-		List<String> firedRules = new ArrayList<String>();
-		KieSession ksession = this
-				.createKieSession("approvers.drl", firedRules);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
 
 		// Create Company hierarchy
 		Employee president = createPresident(id);
@@ -391,21 +414,17 @@ public class BusinessRulesTest {
 		ksession.setGlobal("vacationDepartment",
 				CompensationDepartment.VACATION);
 
-		// Add facts to session
-		KieTestHelper.insert(ksession, operatorRequest);
-
-		// Fire rules
-		System.out.println("=== FIRING RULES ===");
-		ksession.fireAllRules();
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, operatorRequest);
 
 		// Assert that two rules were fired
 		Assert.assertEquals(2, firedRules.size());
 
 		// Assert approvers: his supervisor, the VP of his area and the HR VP
-		Assert.assertEquals(3, operatorRequest.getApprovers().size());
-		assertSupervisorIsApprover(operator, operatorRequest);
-		Assert.assertTrue(operatorRequest.getApprovers().contains(vp));
-		Assert.assertTrue(operatorRequest.getApprovers().contains(hrvp));
+		Assert.assertEquals(3, operatorRequest.getApprovals().size());
+		assertSupervisorIsApprover(operatorRequest, operator);
+		Assert.assertTrue(isApprover(operatorRequest, vp));
+		Assert.assertTrue(isApprover(operatorRequest, hrvp));
 
 		// Assert that the Vacation Department will review his request
 		Assert.assertFalse(operatorRequest.getCompensationDepartments()
@@ -416,16 +435,15 @@ public class BusinessRulesTest {
 				.contains(CompensationDepartment.VACATION));
 
 		// Dispose session
-		ksession.dispose();
-
+		manager.disposeRuntimeEngine(engine);
 	}
 
 	@Test
 	public void testExam() throws Exception {
 		AtomicInteger id = new AtomicInteger(1);
-		List<String> firedRules = new ArrayList<String>();
-		KieSession ksession = this
-				.createKieSession("approvers.drl", firedRules);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
 
 		// Create Company hierarchy
 		Employee president = createPresident(id);
@@ -443,19 +461,15 @@ public class BusinessRulesTest {
 		ksession.setGlobal("vacationDepartment",
 				CompensationDepartment.VACATION);
 
-		// Add facts to session
-		KieTestHelper.insert(ksession, operatorRequest);
-
-		// Fire rules
-		System.out.println("=== FIRING RULES ===");
-		ksession.fireAllRules();
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, operatorRequest);
 
 		// Assert that two rules were fired
 		Assert.assertEquals(2, firedRules.size());
 
 		// Assert approvers: his supervisor
-		Assert.assertEquals(1, operatorRequest.getApprovers().size());
-		assertSupervisorIsApprover(operator, operatorRequest);
+		Assert.assertEquals(1, operatorRequest.getApprovals().size());
+		assertSupervisorIsApprover(operatorRequest, operator);
 
 		// Assert that the Vacation Department will review his request
 		Assert.assertFalse(operatorRequest.getCompensationDepartments()
@@ -466,16 +480,15 @@ public class BusinessRulesTest {
 				.contains(CompensationDepartment.VACATION));
 
 		// Dispose session
-		ksession.dispose();
-
+		manager.disposeRuntimeEngine(engine);
 	}
 
 	@Test
 	public void testExceptionalLessThanTwoMonths() throws Exception {
 		AtomicInteger id = new AtomicInteger(1);
-		List<String> firedRules = new ArrayList<String>();
-		KieSession ksession = this
-				.createKieSession("approvers.drl", firedRules);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
 
 		// Create Company hierarchy
 		Employee president = createPresident(id);
@@ -491,7 +504,7 @@ public class BusinessRulesTest {
 				.plannedStartDate(DateUtils.parseDate("20140101"))
 				.plannedEndDate(DateUtils.parseDate("20140302")).build();
 
-		System.out.println(" ==> Days of exceptional leave: "
+		logger.debug(" ==> Days of exceptional leave: "
 				+ AbsenceService.getAbsenceDays(operator,
 						operatorRequest.getPlannedStartDate(),
 						operatorRequest.getPlannedEndDate()));
@@ -501,12 +514,8 @@ public class BusinessRulesTest {
 				CompensationDepartment.VACATION);
 		ksession.setGlobal("payrollDepartment", CompensationDepartment.PAYROLL);
 
-		// Add facts to session
-		KieTestHelper.insert(ksession, operatorRequest);
-
-		// Fire rules
-		System.out.println("=== FIRING RULES ===");
-		ksession.fireAllRules();
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, operatorRequest);
 
 		// Assert duration, less than two months
 		Assert.assertTrue(AbsenceService.getAbsenceDays(operator,
@@ -517,9 +526,10 @@ public class BusinessRulesTest {
 		Assert.assertEquals(2, firedRules.size());
 
 		// Assert approvers: his supervisor and GM of his area
-		Assert.assertEquals(2, operatorRequest.getApprovers().size());
-		assertSupervisorIsApprover(operator, operatorRequest);
-		Assert.assertTrue(operatorRequest.getApprovers().contains(gm));
+		Assert.assertEquals(2, operatorRequest.getApprovals().size());
+		assertSupervisorIsApprover(operatorRequest, operator);
+		Assert.assertTrue("General Manager has not been set as Approver",
+				isApprover(operatorRequest, gm));
 
 		// Assert that the Vacation and Payroll Departments will review his
 		// request
@@ -533,16 +543,15 @@ public class BusinessRulesTest {
 				.contains(CompensationDepartment.PAYROLL));
 
 		// Dispose session
-		ksession.dispose();
-
+		manager.disposeRuntimeEngine(engine);
 	}
 
 	@Test
 	public void testExceptionalMoreThanTwoMonths() throws Exception {
 		AtomicInteger id = new AtomicInteger(1);
-		List<String> firedRules = new ArrayList<String>();
-		KieSession ksession = this
-				.createKieSession("approvers.drl", firedRules);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
 
 		// Create Company hierarchy
 		Employee president = createPresident(id);
@@ -558,7 +567,7 @@ public class BusinessRulesTest {
 				.plannedStartDate(DateUtils.parseDate("20140101"))
 				.plannedEndDate(DateUtils.parseDate("20140303")).build();
 
-		System.out.println(" ==> Days of exceptional leave: "
+		logger.debug(" ==> Days of exceptional leave: "
 				+ AbsenceService.getAbsenceDays(operator,
 						operatorRequest.getPlannedStartDate(),
 						operatorRequest.getPlannedEndDate()));
@@ -568,12 +577,8 @@ public class BusinessRulesTest {
 				CompensationDepartment.VACATION);
 		ksession.setGlobal("payrollDepartment", CompensationDepartment.PAYROLL);
 
-		// Add facts to session
-		KieTestHelper.insert(ksession, operatorRequest);
-
-		// Fire rules
-		System.out.println("=== FIRING RULES ===");
-		ksession.fireAllRules();
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, operatorRequest);
 
 		// Assert duration, more than two months
 		Assert.assertTrue(AbsenceService.getAbsenceDays(operator,
@@ -584,10 +589,10 @@ public class BusinessRulesTest {
 		Assert.assertEquals(2, firedRules.size());
 
 		// Assert approvers: his supervisor, GM and VP of his area
-		Assert.assertEquals(3, operatorRequest.getApprovers().size());
-		assertSupervisorIsApprover(operator, operatorRequest);
-		Assert.assertTrue(operatorRequest.getApprovers().contains(gm));
-		Assert.assertTrue(operatorRequest.getApprovers().contains(vp));
+		Assert.assertEquals(3, operatorRequest.getApprovals().size());
+		assertSupervisorIsApprover(operatorRequest, operator);
+		Assert.assertTrue(isApprover(operatorRequest, gm));
+		Assert.assertTrue(isApprover(operatorRequest, vp));
 
 		// Assert that the Vacation and Payroll Departments will review his
 		// request
@@ -601,16 +606,15 @@ public class BusinessRulesTest {
 				.contains(CompensationDepartment.PAYROLL));
 
 		// Dispose session
-		ksession.dispose();
-
+		manager.disposeRuntimeEngine(engine);
 	}
 
 	@Test
 	public void testMarriage() throws Exception {
 		AtomicInteger id = new AtomicInteger(1);
-		List<String> firedRules = new ArrayList<String>();
-		KieSession ksession = this
-				.createKieSession("approvers.drl", firedRules);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
 
 		// Create Company hierarchy
 		Employee president = createPresident(id);
@@ -628,19 +632,15 @@ public class BusinessRulesTest {
 		ksession.setGlobal("vacationDepartment",
 				CompensationDepartment.VACATION);
 
-		// Add facts to session
-		KieTestHelper.insert(ksession, operatorRequest);
-
-		// Fire rules
-		System.out.println("=== FIRING RULES ===");
-		ksession.fireAllRules();
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, operatorRequest);
 
 		// Assert that two rules were fired
 		Assert.assertEquals(2, firedRules.size());
 
 		// Assert approvers: his supervisor
-		Assert.assertEquals(1, operatorRequest.getApprovers().size());
-		assertSupervisorIsApprover(operator, operatorRequest);
+		Assert.assertEquals(1, operatorRequest.getApprovals().size());
+		assertSupervisorIsApprover(operatorRequest, operator);
 
 		// Assert that the Vacation Department will review his request
 		Assert.assertFalse(operatorRequest.getCompensationDepartments()
@@ -651,15 +651,15 @@ public class BusinessRulesTest {
 				.contains(CompensationDepartment.VACATION));
 
 		// Dispose session
-		ksession.dispose();
+		manager.disposeRuntimeEngine(engine);
 	}
 
 	@Test
 	public void testPaternity() throws Exception {
 		AtomicInteger id = new AtomicInteger(1);
-		List<String> firedRules = new ArrayList<String>();
-		KieSession ksession = this
-				.createKieSession("approvers.drl", firedRules);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
 
 		// Create Company hierarchy
 		Employee president = createPresident(id);
@@ -677,19 +677,15 @@ public class BusinessRulesTest {
 		ksession.setGlobal("vacationDepartment",
 				CompensationDepartment.VACATION);
 
-		// Add facts to session
-		KieTestHelper.insert(ksession, operatorRequest);
-
-		// Fire rules
-		System.out.println("=== FIRING RULES ===");
-		ksession.fireAllRules();
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, operatorRequest);
 
 		// Assert that two rules were fired
 		Assert.assertEquals(2, firedRules.size());
 
 		// Assert approvers: his supervisor
-		Assert.assertEquals(1, operatorRequest.getApprovers().size());
-		assertSupervisorIsApprover(operator, operatorRequest);
+		Assert.assertEquals(1, operatorRequest.getApprovals().size());
+		assertSupervisorIsApprover(operatorRequest, operator);
 
 		// Assert that the Vacation Department will review his request
 		Assert.assertFalse(operatorRequest.getCompensationDepartments()
@@ -700,15 +696,15 @@ public class BusinessRulesTest {
 				.contains(CompensationDepartment.VACATION));
 
 		// Dispose session
-		ksession.dispose();
+		manager.disposeRuntimeEngine(engine);
 	}
 
 	@Test
 	public void testTransfer() throws Exception {
 		AtomicInteger id = new AtomicInteger(1);
-		List<String> firedRules = new ArrayList<String>();
-		KieSession ksession = this
-				.createKieSession("approvers.drl", firedRules);
+		final List<String> firedRules = new ArrayList<String>();
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		final KieSession ksession = getConfiguredSession(engine, firedRules);
 
 		// Create Company hierarchy
 		Employee president = createPresident(id);
@@ -726,19 +722,15 @@ public class BusinessRulesTest {
 		ksession.setGlobal("vacationDepartment",
 				CompensationDepartment.VACATION);
 
-		// Add facts to session
-		KieTestHelper.insert(ksession, operatorRequest);
-
-		// Fire rules
-		System.out.println("=== FIRING RULES ===");
-		ksession.fireAllRules();
+		// Start the Process, which triggers the ruleflow-group select-approvers
+		startMockProcess(ksession, operatorRequest);
 
 		// Assert that two rules were fired
 		Assert.assertEquals(2, firedRules.size());
 
 		// Assert approvers: his supervisor
-		Assert.assertEquals(1, operatorRequest.getApprovers().size());
-		assertSupervisorIsApprover(operator, operatorRequest);
+		Assert.assertEquals(1, operatorRequest.getApprovals().size());
+		assertSupervisorIsApprover(operatorRequest, operator);
 
 		// Assert that the Vacation Department will review his request
 		Assert.assertFalse(operatorRequest.getCompensationDepartments()
@@ -749,11 +741,11 @@ public class BusinessRulesTest {
 				.contains(CompensationDepartment.VACATION));
 
 		// Dispose session
-		ksession.dispose();
+		manager.disposeRuntimeEngine(engine);
 	}
 
 	@Test
-	public void testSupervisor() {
+	public void testEmployeeGetSupervisor() {
 		AtomicInteger id = new AtomicInteger();
 
 		// Create Company hierarchy
@@ -766,16 +758,148 @@ public class BusinessRulesTest {
 		Assert.assertNull(operator.getSupervisor(Role.GENERAL_MANAGER));
 	}
 
-	/*
-	 * ============== HELPER METHODS ==============
+	/**
+	 * Asserts if the Direct Supervisor of the employee is an approver of the
+	 * LeaveRequest
+	 * 
+	 * @param leaveRequest
+	 * @param employee
 	 */
-
-	private void assertSupervisorIsApprover(Employee operator,
-			LeaveRequest operatorRequest) {
-		Assert.assertFalse(operatorRequest.getApprovers().isEmpty());
-		Assert.assertTrue(operatorRequest.getApprovers().contains(
-				operator.getDirectSupervisor()));
+	private void assertSupervisorIsApprover(LeaveRequest leaveRequest,
+			Employee employee) {
+		Assert.assertFalse(leaveRequest.getApprovals().isEmpty());
+		Assert.assertTrue("Direct Supervisor has not been set as Approver",
+				isApprover(leaveRequest, employee.getDirectSupervisor()));
 	}
+
+	/**
+	 * Returns true if the LeaveRequest has a LeaveApproval which must be
+	 * approved by the approver sent as parameter
+	 * 
+	 * @param leaveRequest
+	 * @param approver
+	 * @return true if the approver is an approver for the LeaveRequest
+	 */
+	private boolean isApprover(LeaveRequest leaveRequest, Employee approver) {
+		boolean isApprover = false;
+		Assert.assertFalse(leaveRequest.getApprovals().isEmpty());
+		for (LeaveApproval approval : leaveRequest.getApprovals()) {
+			if (approver.equals(approval.getApprover())) {
+				isApprover = true;
+				break;
+			}
+		}
+		return isApprover;
+	}
+
+	/**
+	 * Returns a Resources representing a Mock Process, which has only one Rule
+	 * Set Node for the ruleflow-group: "select-approvers".
+	 * 
+	 * @return a mock process for testing purposes
+	 */
+	private static Resource getMockProcessAsResource() {
+		RuleFlowProcessFactory factory = RuleFlowProcessFactory
+				.createProcess(MOCK_PROCESS_ID);
+		factory
+		// Header
+		.name("ApprovalRulesTestProcess")
+				.version("1.0")
+				.packageName("com.plugtree")
+				// Nodes
+				.startNode(1).name("Start").done().ruleSetNode(2)
+				.name("Action").ruleFlowGroup(SELECT_APPROVERS_RFG).done()
+				.endNode(3).name("End").done()
+				// Connections
+				.connection(1, 2).connection(2, 3);
+		RuleFlowProcess process = factory.validate().getProcess();
+
+		return ResourceFactory
+				.newByteArrayResource(XmlBPMNProcessDumper.INSTANCE.dump(
+						process).getBytes());
+	}
+
+	/**
+	 * Returns a new RuntimeManager to be shared by the test cases
+	 * 
+	 * @return a new RuntimeManager
+	 */
+	private static RuntimeManager createRuntimeManager() {
+		// Environment Configuration
+		RuntimeEnvironment environment = RuntimeEnvironmentBuilder.Factory
+				.get()
+				.newEmptyBuilder()
+				.addAsset(getMockProcessAsResource(), ResourceType.BPMN2)
+				.addAsset(ResourceFactory.newClassPathResource(VACATION_DRL),
+						ResourceType.DRL).get();
+		return RuntimeManagerFactory.Factory.get().newPerRequestRuntimeManager(
+				environment);
+	}
+
+	/**
+	 * Retrieves the KieSession from the Engine and configures the Listeners and
+	 * Globals needed by the Test Cases. Finally, returns the KieSession.
+	 * 
+	 * @param engine
+	 * @param firedRules
+	 * @return the Configured KieSession
+	 */
+	private KieSession getConfiguredSession(RuntimeEngine engine,
+			final Collection<String> firedRules) {
+		final KieSession ksession = engine.getKieSession();
+		ksession.addEventListener(new DefaultAgendaEventListener() {
+			@Override
+			public void afterMatchFired(AfterMatchFiredEvent event) {
+				firedRules.add(event.getMatch().getRule().getName());
+			}
+
+			@Override
+			public void matchCreated(MatchCreatedEvent event) {
+				logger.debug(">> MATCH has been created: "
+						+ event.getMatch().getRule().getName());
+				ksession.fireAllRules();
+			}
+
+			@Override
+			public void afterRuleFlowGroupActivated(
+					RuleFlowGroupActivatedEvent event) {
+				logger.debug(">> RULEFLOW-GROUP has been activated: "
+						+ event.getRuleFlowGroup().getName());
+				ksession.fireAllRules();
+			}
+		});
+		// Required for logging
+		ksession.setGlobal("logger", logger);
+		return ksession;
+	}
+
+	/**
+	 * Creates and starts the Mock Process, setting the LeaveRequest as a
+	 * Process Variable and adding the additional variables required by the
+	 * Business Rules. Asserts that the Process has been completed.
+	 * 
+	 * @param ksession
+	 * @param leaveRequest
+	 */
+	private void startMockProcess(final KieSession ksession,
+			LeaveRequest leaveRequest) {
+		logger.debug("=== Starting mock process ===");
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("leaveRequest", leaveRequest);
+		params.put("approvals", leaveRequest.getApprovals());
+		WorkflowProcessInstance processInstance = (WorkflowProcessInstance) ksession
+				.createProcessInstance(MOCK_PROCESS_ID, params);
+		Assert.assertEquals(ProcessInstance.STATE_PENDING,
+				processInstance.getState());
+		ksession.insert(processInstance);
+		ksession.startProcessInstance(processInstance.getId());
+		Assert.assertEquals(ProcessInstance.STATE_COMPLETED,
+				processInstance.getState());
+	}
+
+	/*
+	 * METHODS FOR CREATING THE EMPLOYEES HIERARCHY AND LEAVE REQUESTS
+	 */
 
 	private LeaveRequest.Builder createOperatorRequestBuilder(
 			Employee operator, LeaveType leaveType, Boolean requestPayment) {
@@ -860,20 +984,5 @@ public class BusinessRulesTest {
 				.phone("555-555-555").position("HR VP")
 				.role(Role.VICE_PRESIDENT).directSupervisor(directSupervisor)
 				.build();
-	}
-
-	private KieSession createKieSession(String drlFile,
-			final List<String> firedRules) throws Exception {
-		KieSession ksession = KieTestHelper.createKieSession(drlFile);
-
-		if (firedRules != null) {
-			ksession.addEventListener(new DefaultAgendaEventListener() {
-				@Override
-				public void afterMatchFired(AfterMatchFiredEvent event) {
-					firedRules.add(event.getMatch().getRule().getName());
-				}
-			});
-		}
-		return ksession;
 	}
 }

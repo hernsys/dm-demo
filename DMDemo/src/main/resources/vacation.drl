@@ -72,29 +72,20 @@ end
 
 **/
 
-/**
-
-	===> NOTE: 	approvers.drl has the original rules, which are tested by BusinessRulesTest <===
-
-
-
 rule "President request"
 ruleflow-group "select-approvers"
 no-loop
     when
     	$pi: WorkflowProcessInstanceImpl()
-        $r:LeaveRequest() from $pi.variables["leaveRequest"]
+        $r:LeaveRequest(status == Status.OPEN, employee.role == Role.PRESIDENT) from $pi.variables["leaveRequest"]
     then
-        System.out.println("Hello " + $r.employee + ". The HR VP will approve your request.");
-        modify ($r) {
-        	addApprover(hrvp);
-        }
+        logger.debug("Hello Mr. President " + $r.employee + ". The HR VP will approve your request.");
+        Collection approvals = (Collection) $pi.getVariable("approvals");
+        approvals.add(LeaveApproval.newLeaveApproval($r, hrvp));
 end
-**/
 
 rule "Direct Supervisor approval"
 ruleflow-group "select-approvers"
-no-loop
     when
        	$pi: WorkflowProcessInstanceImpl();
         $r:LeaveRequest(status == Status.OPEN, employee.role != Role.PRESIDENT, employee.directSupervisor != null) from $pi.variables["leaveRequest"];
@@ -102,176 +93,145 @@ no-loop
         logger.debug("Hello " + $r.employee + ". Your Direct Supervisor (" + $r.employee.directSupervisor + ") will approve your request.");
         Collection approvals = (Collection) $pi.getVariable("approvals");
         approvals.add(LeaveApproval.newDirectSupervisorLeaveApproval($r));
-        update($pi);
-        logger.debug("New Approval was added. Approvals: " + approvals.size());
 end
 
-/**
+
 rule "New Annual request without salary"
 ruleflow-group "select-approvers"
 	when
+		$pi: WorkflowProcessInstanceImpl();
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.ANNUAL, requestPayment == false,
-						employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments);
+						employee.role != Role.PRESIDENT) from $pi.variables["leaveRequest"];
 	then
-        System.out.println("Hello " + $r.employee + ". New requests for Annual leaves without salary must be approved by the following Compensation Departments: Vacation");
-        modify ($r) {
-        	addCompensationDepartment(vacationDepartment);
-        }
+        logger.debug("Hello " + $r.employee + ". New requests for Annual leaves without salary must be approved by the following Compensation Departments: Vacation");
+        $r.addCompensationDepartment(vacationDepartment);
 end
+
 
 rule "New Annual request with salary"
 ruleflow-group "select-approvers"
 	when
+		$pi: WorkflowProcessInstanceImpl();
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.ANNUAL, requestPayment == true,
-		employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments);
+		employee.role != Role.PRESIDENT) from $pi.variables["leaveRequest"];
 	then
-        System.out.println("Hello " + $r.employee + ". New requests for Annual leaves with salary must be approved by the following Compensation Departments: Vacation, Payroll and Travel");
-        modify ($r) {
-			addCompensationDepartment(payrollDepartment);
-        }
-        modify ($r) {
-			addCompensationDepartment(travelDepartment);
-        }
-        modify ($r) {
-			addCompensationDepartment(vacationDepartment);
-        }
+        logger.debug("Hello " + $r.employee + ". New requests for Annual leaves with salary must be approved by the following Compensation Departments: Vacation, Payroll and Travel");
+        $r.addCompensationDepartment(payrollDepartment);
+        $r.addCompensationDepartment(travelDepartment);
+        $r.addCompensationDepartment(vacationDepartment);
 end
+
 
 rule "Update or Cancel of Annual request without salary"
 ruleflow-group "select-approvers"
 	when
+		$pi: WorkflowProcessInstanceImpl();
 		$r:LeaveRequest(status == Status.OPEN, type in (Type.MODIFY, Type.CANCEL), leaveType == LeaveType.ANNUAL, requestPayment == false,
-		employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments);
+		employee.role != Role.PRESIDENT) from $pi.variables["leaveRequest"];
 	then
-        System.out.println("Hello " + $r.employee + ". Update/Cancel requests for Annual leaves without salary must be approved by the following Compensation Departments: Vacation, Travel");
-        modify ($r) {
-        	addCompensationDepartment(vacationDepartment);
-        }
-        modify ($r) {
-        	addCompensationDepartment(travelDepartment);
-        }
+        logger.debug("Hello " + $r.employee + ". Update/Cancel requests for Annual leaves without salary must be approved by the following Compensation Departments: Vacation, Travel");
+        $r.addCompensationDepartment(vacationDepartment);
+        $r.addCompensationDepartment(travelDepartment);
 end
 
 rule "Update or Cancel of Annual request with salary"
 ruleflow-group "select-approvers"
 	when
+		$pi: WorkflowProcessInstanceImpl();
 		$r:LeaveRequest(status == Status.OPEN, type in (Type.MODIFY, Type.CANCEL), leaveType == LeaveType.ANNUAL, requestPayment == true,
-		employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments);
+		employee.role != Role.PRESIDENT) from $pi.variables["leaveRequest"];
 	then
-        System.out.println("Hello " + $r.employee + ". Update/Cancel requests for Annual leaves with salary must be approved by the following Compensation Departments: Vacation, Travel, Payroll");
-        modify ($r) {
-			addCompensationDepartment(payrollDepartment);
-        }
-        modify ($r) {
-			addCompensationDepartment(travelDepartment);
-        }
-        modify ($r) {
-			addCompensationDepartment(vacationDepartment);
-        }
+        logger.debug("Hello " + $r.employee + ". Update/Cancel requests for Annual leaves with salary must be approved by the following Compensation Departments: Vacation, Travel, Payroll");
+        $r.addCompensationDepartment(payrollDepartment);
+        $r.addCompensationDepartment(travelDepartment);
+        $r.addCompensationDepartment(vacationDepartment);
 end
+
 
 rule "New Education without salary Leave"
 ruleflow-group "select-approvers"
 	when
+		$pi: WorkflowProcessInstanceImpl();
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.EDUCATION,
-								$e:employee, $e.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments);
+								$e:employee, $e.role != Role.PRESIDENT) from $pi.variables["leaveRequest"];
 	then
-        System.out.println("Hello " + $r.employee + ". New requests for Education without salary Leave must approved by the GM, VP and the Vacation Compensation Department");
-        modify ($r) {
-			addApprover($e.getSupervisor(Role.VICE_PRESIDENT));
-        }
-        modify ($r) {
-			addApprover(hrvp);
-        }
-        modify ($r) {
-			addCompensationDepartment(vacationDepartment);
-        }
+        logger.debug("Hello " + $r.employee + ". New requests for Education without salary Leave must approved by the GM, VP and the Vacation Compensation Department");
+        Collection approvals = (Collection) $pi.getVariable("approvals");
+        approvals.add(LeaveApproval.newLeaveApproval($r, $e.getSupervisor(Role.VICE_PRESIDENT)));
+        Collection approvals = (Collection) $pi.getVariable("approvals");
+        approvals.add(LeaveApproval.newLeaveApproval($r, hrvp));
+        $r.addCompensationDepartment(vacationDepartment);
 end
 
 
 rule "New Exam leave"
 ruleflow-group "select-approvers"
 	when
-		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.EXAM, employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments);
+		$pi: WorkflowProcessInstanceImpl();
+		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.EXAM, employee.role != Role.PRESIDENT) from $pi.variables["leaveRequest"];
 	then
-        System.out.println("Hello " + $r.employee + ". New requests for Exam Leaves must be approved by the following Compensation Departments: Vacation");
-        modify ($r) {
-			addCompensationDepartment(vacationDepartment);
-        }
+        logger.debug("Hello " + $r.employee + ". New requests for Exam Leaves must be approved by the following Compensation Departments: Vacation");
+        $r.addCompensationDepartment(vacationDepartment);
 end
 
 rule "Exceptional no more than 2 months leave"
 ruleflow-group "select-approvers"
 	when
+		$pi: WorkflowProcessInstanceImpl();
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.EXCEPTIONAL,
-		plannedStartDate before [0d, 60d] plannedEndDate, employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments)
+		plannedStartDate before [0d, 60d] plannedEndDate, employee.role != Role.PRESIDENT)  from $pi.variables["leaveRequest"];
 	then
-        System.out.println("Hello " + $r.employee + ". New requests for Exceptional Leaves (<=2 months) must also be approved by your GM and the following Compensation Departments: Vacation, Payroll");
-        modify ($r) {
-			addApprover($r.employee.getSupervisor(Role.GENERAL_MANAGER));
-        }
-        modify ($r) {
-			addCompensationDepartment(vacationDepartment);
-        }
-        modify ($r) {
-			addCompensationDepartment(payrollDepartment);
-        }
+        logger.debug("Hello " + $r.employee + ". New requests for Exceptional Leaves (<=2 months) must also be approved by your GM and the following Compensation Departments: Vacation, Payroll");
+        Collection approvals = (Collection) $pi.getVariable("approvals");
+        approvals.add(LeaveApproval.newLeaveApproval($r, $r.employee.getSupervisor(Role.GENERAL_MANAGER)));
+        $r.addCompensationDepartment(vacationDepartment);
+        $r.addCompensationDepartment(payrollDepartment);
 end
 
 rule "Exceptional more than 2 months leave"
 ruleflow-group "select-approvers"
 	when
+		$pi: WorkflowProcessInstanceImpl();
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.EXCEPTIONAL,
-		plannedStartDate before [61d] plannedEndDate, employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments)
+		plannedStartDate before [61d] plannedEndDate, employee.role != Role.PRESIDENT)  from $pi.variables["leaveRequest"];
 	then
-        System.out.println("Hello " + $r.employee + ". New requests for Exceptional Leaves (> 2 months) must also be approved by your GM, VP and the following Compensation Departments: Vacation, Payroll");
-        modify ($r) {
-			addApprover($r.employee.getSupervisor(Role.GENERAL_MANAGER));
-        }
-        modify($r) {
-        	addApprover($r.employee.getSupervisor(Role.VICE_PRESIDENT));
-        }
-        modify ($r) {
-			addCompensationDepartment(vacationDepartment);
-        }
-        modify ($r) {
-			addCompensationDepartment(payrollDepartment);
-        }
+        logger.debug("Hello " + $r.employee + ". New requests for Exceptional Leaves (> 2 months) must also be approved by your GM, VP and the following Compensation Departments: Vacation, Payroll");
+        Collection approvals = (Collection) $pi.getVariable("approvals");
+        approvals.add(LeaveApproval.newLeaveApproval($r, $r.employee.getSupervisor(Role.GENERAL_MANAGER)));
+        approvals.add(LeaveApproval.newLeaveApproval($r, $r.employee.getSupervisor(Role.VICE_PRESIDENT)));
+        $r.addCompensationDepartment(vacationDepartment);
+        $r.addCompensationDepartment(payrollDepartment);
 end
 
 rule "Marriage leave"
 ruleflow-group "select-approvers"
 	when
+		$pi: WorkflowProcessInstanceImpl();
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.MARRIAGE,
-				employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments)
+				employee.role != Role.PRESIDENT)  from $pi.variables["leaveRequest"];
 	then
-        System.out.println("Hello " + $r.employee + ". New requests for Marriage Leaves must be approved by the following Compensation Departments: Vacation");
-        modify ($r) {
-			addCompensationDepartment(vacationDepartment);
-        }
+        logger.debug("Hello " + $r.employee + ". New requests for Marriage Leaves must be approved by the following Compensation Departments: Vacation");
+        $r.addCompensationDepartment(vacationDepartment);
 end
 
 rule "Paternity leave"
 ruleflow-group "select-approvers"
 	when
+		$pi: WorkflowProcessInstanceImpl();
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.PATERNITY,
-				employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments)
+				employee.role != Role.PRESIDENT)  from $pi.variables["leaveRequest"];
 	then
-        System.out.println("Hello " + $r.employee + ". New requests for Paternity Leaves must be approved by the following Compensation Departments: Vacation");
-        modify ($r) {
-			addCompensationDepartment(vacationDepartment);
-        }
+        logger.debug("Hello " + $r.employee + ". New requests for Paternity Leaves must be approved by the following Compensation Departments: Vacation");
+        $r.addCompensationDepartment(vacationDepartment);
 end
 
 rule "Transfer leave"
 ruleflow-group "select-approvers"
 	when
+		$pi: WorkflowProcessInstanceImpl();
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.TRANSFER,
-				employee.role != Role.PRESIDENT) @watch(!approvers, !compensationDepartments)
+				employee.role != Role.PRESIDENT)  from $pi.variables["leaveRequest"];
 	then
-        System.out.println("Hello " + $r.employee + ". New requests for Sports Leaves must be approved by the following Compensation Departments: Vacation");
-        modify ($r) {
-			addCompensationDepartment(vacationDepartment);
-        }
+        logger.debug("Hello " + $r.employee + ". New requests for Sports Leaves must be approved by the following Compensation Departments: Vacation");
+        $r.addCompensationDepartment(vacationDepartment);
 end
-**/

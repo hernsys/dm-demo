@@ -20,7 +20,7 @@ public class LeaveApproval implements Serializable {
 	 * @param request the LeaveRequest
 	 * @param approver the Approver
 	 */
-	public LeaveApproval(LeaveRequest request, Employee approver) {
+	private LeaveApproval(LeaveRequest request, Employee approver) {
 		this.request = request;
 		this.approver = approver;
 		this.type = ApprovalType.PENDING;
@@ -52,5 +52,9 @@ public class LeaveApproval implements Serializable {
 
 	public static LeaveApproval newDirectSupervisorLeaveApproval(LeaveRequest leaveRequest) {
 		return new LeaveApproval(leaveRequest, leaveRequest.getEmployee().getDirectSupervisor());
+	}
+	
+	public static LeaveApproval newLeaveApproval(LeaveRequest request, Employee approver) {
+		return new LeaveApproval(request, approver);
 	}
 }
