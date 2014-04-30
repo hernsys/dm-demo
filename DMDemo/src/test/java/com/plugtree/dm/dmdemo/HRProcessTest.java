@@ -15,6 +15,7 @@ import org.kie.api.event.process.ProcessNodeLeftEvent;
 import org.kie.api.event.process.ProcessNodeTriggeredEvent;
 import org.kie.api.event.process.ProcessStartedEvent;
 import org.kie.api.event.process.ProcessVariableChangedEvent;
+import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.process.ProcessInstance;
 
@@ -37,7 +38,9 @@ public class HRProcessTest {
 	private static final String HUMAN_RESOURCES = "HumanResources";
 	private static final String HR_DIRECTOR = "HRDirector";
 	protected List<String> triggeredWorkItemNodes = new ArrayList<String>();
-
+	private static final KieContainer kcontainer = KieTestHelper.createKieContainer("HRProcess.bpmn2",
+			"HRVacation.bpmn2");
+	
 	@Before
 	public void beforeTest() {
 		triggeredWorkItemNodes.clear();
@@ -45,7 +48,7 @@ public class HRProcessTest {
 
 	@Test
 	public void testCancel_Travel_NoHRDirector() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for service and human tasks
 		registerWorkItemHandlers(ksession);
@@ -78,7 +81,7 @@ public class HRProcessTest {
 
 	@Test
 	public void testCancel_Travel_HRDirector() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for service and human tasks
 		registerWorkItemHandlers(ksession);
@@ -112,7 +115,7 @@ public class HRProcessTest {
 
 	@Test
 	public void testCancel_NoTravel_NoHumanResources_NoHRDirector() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for service and human tasks
 		registerWorkItemHandlers(ksession);
@@ -145,7 +148,7 @@ public class HRProcessTest {
 
 	@Test
 	public void testCancel_NoTravel_NoHumanResources_HRDirector() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for service and human tasks
 		registerWorkItemHandlers(ksession);
@@ -178,7 +181,7 @@ public class HRProcessTest {
 
 	@Test
 	public void testCancel_NoTravel_HumanResources_HRDirector() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for service and human tasks
 		registerWorkItemHandlers(ksession);
@@ -212,7 +215,7 @@ public class HRProcessTest {
 
 	@Test
 	public void testCancel_NoTravel_HumanResources_NoHRDirector() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for service and human tasks
 		registerWorkItemHandlers(ksession);
@@ -311,10 +314,4 @@ public class HRProcessTest {
 		public void afterNodeLeft(ProcessNodeLeftEvent event) {
 		}
 	}
-
-	private KieSession createSession() {
-		return KieTestHelper.createKieSession("HRProcess.bpmn2",
-				"HRVacation.bpmn2");
-	}
-
 }

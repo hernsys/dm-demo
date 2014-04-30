@@ -15,6 +15,7 @@ import org.kie.api.event.process.ProcessNodeLeftEvent;
 import org.kie.api.event.process.ProcessNodeTriggeredEvent;
 import org.kie.api.event.process.ProcessStartedEvent;
 import org.kie.api.event.process.ProcessVariableChangedEvent;
+import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.process.ProcessInstance;
 import org.kie.api.runtime.process.WorkItem;
@@ -47,6 +48,7 @@ public class HRVacationProcessTest {
 	private static final String ROLLBACK_FORM_TO_DIRECT_MANAGER = "RollbackFormToDirectManager";
 	private static final String ROLLBACK_FORM_TO_REQUESTOR = "RollbackFormToRequestor";
 	protected List<String> triggeredWorkItemNodes = new ArrayList<String>();
+	private static final KieContainer kcontainer = KieTestHelper.createKieContainer("HRVacation.bpmn2");
 
 	@Before
 	public void beforeTest() {
@@ -55,7 +57,7 @@ public class HRVacationProcessTest {
 
 	@Test
 	public void testRollbackToDirectManager() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
@@ -87,7 +89,7 @@ public class HRVacationProcessTest {
 
 	@Test
 	public void testRollbackToRequestor() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
@@ -117,7 +119,7 @@ public class HRVacationProcessTest {
 
 	@Test
 	public void testRejected() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
@@ -147,7 +149,7 @@ public class HRVacationProcessTest {
 
 	@Test
 	public void testApproved_NotExecutive_AddVacation_Payroll_Travel() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
@@ -204,7 +206,7 @@ public class HRVacationProcessTest {
 
 	@Test
 	public void testApproved_NotExecutive_AddVacation_NoPayroll_Travel() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
@@ -238,7 +240,7 @@ public class HRVacationProcessTest {
 
 	@Test
 	public void testApproved_NotExecutive_AddVacation_NoPayroll_NotTravel() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
@@ -274,7 +276,7 @@ public class HRVacationProcessTest {
 
 	@Test
 	public void testApproved_NotExecutive_CancelVacation_NoPayroll_Travel() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
@@ -308,7 +310,7 @@ public class HRVacationProcessTest {
 
 	@Test
 	public void testApproved_NotExecutive_CancelVacation_NoPayroll_NoTravel() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
@@ -344,7 +346,7 @@ public class HRVacationProcessTest {
 
 	@Test
 	public void testApproved_NotExecutive_ModifyVacation_NoPayroll_Travel() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
@@ -378,7 +380,7 @@ public class HRVacationProcessTest {
 
 	@Test
 	public void testApproved_NotExecutive_ModifyVacation_NoPayroll_NoTravel() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
@@ -414,7 +416,7 @@ public class HRVacationProcessTest {
 
 	@Test
 	public void testApproved_Executive_NoPayroll_NoTravel() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
@@ -447,7 +449,7 @@ public class HRVacationProcessTest {
 
 	@Test
 	public void testApproved_Executive_NoPayroll_Travel() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
@@ -479,7 +481,7 @@ public class HRVacationProcessTest {
 
 	@Test
 	public void testApproved_Executive_Payroll_Travel() {
-		KieSession ksession = createSession();
+		KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 
 		// Add Work item handlers for services
 		registerWorkItemHandlers(ksession);
@@ -591,9 +593,4 @@ public class HRVacationProcessTest {
 		public void afterNodeLeft(ProcessNodeLeftEvent event) {
 		}
 	}
-
-	private KieSession createSession() {
-		return KieTestHelper.createKieSession("HRVacation.bpmn2");
-	}
-
 }

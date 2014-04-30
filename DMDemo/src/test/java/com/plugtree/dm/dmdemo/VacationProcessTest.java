@@ -28,6 +28,7 @@ import org.kie.api.event.process.ProcessVariableChangedEvent;
 import org.kie.api.event.rule.DefaultAgendaEventListener;
 import org.kie.api.event.rule.RuleFlowGroupActivatedEvent;
 import org.kie.api.io.ResourceType;
+import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.manager.RuntimeEngine;
 import org.kie.api.runtime.manager.RuntimeEnvironment;
@@ -73,6 +74,9 @@ public class VacationProcessTest {
 	private static final String DISPLAY_ERROR_REPORT = "Display Error Report";
 	private static final String NOTIFY_USER = "NotifyUser";
 	private PoolingDataSource ds;
+	private static final KieContainer kcontainer = KieTestHelper
+			.createKieContainer("VacationProcess.bpmn2", "HRProcess.bpmn2",
+					"HRVacation.bpmn2", "vacation.drl");
 
 	protected List<String> triggeredWorkItemNodes = new ArrayList<String>();
 
@@ -104,9 +108,7 @@ public class VacationProcessTest {
 	@Test
 	public void testLeaveRequestNotFound() {
 		logger.info("======== Test Case: Leave Request Not Found ========");
-		final KieSession ksession = KieTestHelper.createKieSession(
-				"VacationProcess.bpmn2", "HRProcess.bpmn2", "HRVacation.bpmn2",
-				"vacation.drl");
+		final KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 		// Error tracking
 		List<Message> messages = new ArrayList<Message>();
 		ksession.setGlobal("messages", messages);
@@ -150,9 +152,7 @@ public class VacationProcessTest {
 	@Test
 	public void testPlannedDatesInvalid() {
 		logger.info("======== Test Case: Planned Dates Invalid ========");
-		final KieSession ksession = KieTestHelper.createKieSession(
-				"VacationProcess.bpmn2", "HRProcess.bpmn2", "HRVacation.bpmn2",
-				"vacation.drl");
+		final KieSession ksession = KieTestHelper.createKieSession(kcontainer);
 		// Error tracking
 		List<Message> messages = new ArrayList<Message>();
 		ksession.setGlobal("messages", messages);
@@ -317,17 +317,19 @@ public class VacationProcessTest {
 
 		// The Operator has requested a leave, and his direct supervisor will
 		// work on the human task
-		String approverId = String.valueOf(operator.getDirectSupervisor().getId());
-		List<TaskSummary> approvalTasksSum = taskService
-				.getTasksOwned(approverId, "en-UK");
-		Assert.assertEquals("Direct Supervisor does not have one available task for him", 1,
-				approvalTasksSum.size());
-		// Get Task
-		Task approvalTask = taskService.getTaskById(approvalTasksSum.get(0).getId());
-		// The task should be already reserved to the Direct Supervisor
+		String approverId = String.valueOf(operator.getDirectSupervisor()
+				.getId());
+		List<TaskSummary> approvalTasksSum = taskService.getTasksOwned(
+				approverId, "en-UK");
 		Assert.assertEquals(
-				"Approval Task is not Reserved",
-				Status.Reserved, approvalTask.getTaskData().getStatus());
+				"Direct Supervisor does not have one available task for him",
+				1, approvalTasksSum.size());
+		// Get Task
+		Task approvalTask = taskService.getTaskById(approvalTasksSum.get(0)
+				.getId());
+		// The task should be already reserved to the Direct Supervisor
+		Assert.assertEquals("Approval Task is not Reserved", Status.Reserved,
+				approvalTask.getTaskData().getStatus());
 		// Start the task
 		taskService.start(approvalTask.getId(), approverId);
 		// Refresh task data

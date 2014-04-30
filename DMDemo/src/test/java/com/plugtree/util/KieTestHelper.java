@@ -16,14 +16,14 @@ import org.kie.internal.io.ResourceFactory;
 import org.kie.internal.logger.KnowledgeRuntimeLoggerFactory;
 
 public class KieTestHelper {
+	
 	/**
-	 * Creates a KieSession from the resources sent as parameter. The session will have a Console Logger.
+	 * Creates and returns a KieContainer from the resources sent as parameter.
 	 * 
 	 * @param resources
-	 * @return the created KieSession
-	 * @throws Exception
+	 * @return the created KieContainer
 	 */
-	public static KieSession createKieSession(String... resources) {
+	public static KieContainer createKieContainer(String... resources) {
 		KieServices ks = KieServices.Factory.get();
 		KieFileSystem kfs = ks.newKieFileSystem();
 		for (String r : resources)
@@ -38,8 +38,17 @@ public class KieTestHelper {
 			throw new IllegalArgumentException("Could not parse knowledge.");
 		}
 		KieModule kmodule = kbuilder.getKieModule();
-		KieContainer kcontainer = ks.newKieContainer(kmodule.getReleaseId());
-
+		return ks.newKieContainer(kmodule.getReleaseId());
+	}
+	
+	/**
+	 * Creates a KieSession from the KieContainer sent as parameter. The session will have a Console Logger.
+	 * 
+	 * @param resources
+	 * @return the created KieSession
+	 * @throws Exception
+	 */
+	public static KieSession createKieSession(KieContainer kcontainer) {
 		KieSession ksession = kcontainer.newKieSession();
 		// We can add a runtime logger to understand what is going on inside the
 		// Engine
