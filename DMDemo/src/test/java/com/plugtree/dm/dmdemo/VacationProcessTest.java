@@ -389,8 +389,8 @@ public class VacationProcessTest {
 	 * <li>Employee requests a Leave
 	 * <li>Direct Manager will send the request for a Review
 	 * <li>Reviewer will Reject the request
-	 * <li>Direct Manager will keep the request as Rejected
-	 * <li>Subprocesses will be executed based  on the Rejected status
+	 * <li>Direct Manager will change the Approval to Rollback Form to Manager
+	 * <li>Subprocesses will be executed based on the Status set by the Direct Manager
 	 * </ul>
 	 */
 	@Test
