@@ -4,12 +4,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.kie.api.definition.type.PropertyReactive;
 
 @PropertyReactive
 public class LeaveRequest implements Serializable {
 	private static final long serialVersionUID = 5204988403115488828L;
+	private static final AtomicLong idSeq = new AtomicLong(0);
+	
+	private final long id = idSeq.incrementAndGet();
 
 	public enum Status {
 		OPEN, COMPLETE, CLOSED;
@@ -71,6 +75,10 @@ public class LeaveRequest implements Serializable {
 
 	public boolean removeApprover(Employee a) {
 		return approvers.remove(a);
+	}
+
+	public long getId() {
+		return id;
 	}
 
 	public Type getType() {

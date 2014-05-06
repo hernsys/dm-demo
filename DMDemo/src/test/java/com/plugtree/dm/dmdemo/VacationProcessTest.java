@@ -13,6 +13,7 @@ import javax.persistence.Persistence;
 import org.drools.core.util.DateUtils;
 import org.jbpm.ruleflow.instance.RuleFlowProcessInstance;
 import org.jbpm.services.task.identity.JBossUserGroupCallbackImpl;
+import org.jbpm.services.task.utils.ContentMarshallerHelper;
 import org.jbpm.services.task.wih.LocalHTWorkItemHandler;
 import org.jbpm.workflow.core.node.WorkItemNode;
 import org.junit.After;
@@ -41,7 +42,9 @@ import org.kie.api.task.TaskService;
 import org.kie.api.task.model.Status;
 import org.kie.api.task.model.Task;
 import org.kie.api.task.model.TaskSummary;
+import org.kie.internal.event.KnowledgeRuntimeEventManager;
 import org.kie.internal.io.ResourceFactory;
+import org.kie.internal.logger.KnowledgeRuntimeLoggerFactory;
 import org.kie.internal.runtime.manager.context.EmptyContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +92,7 @@ public class VacationProcessTest {
 		ds = new PoolingDataSource();
 		ds.setUniqueName("jdbc/jbpm-ds");
 		ds.setClassName("org.h2.jdbcx.JdbcDataSource");
-		ds.setMaxPoolSize(3);
+		ds.setMaxPoolSize(6);
 		ds.setAllowLocalTransactions(true);
 		ds.getDriverProperties().setProperty("URL",
 				"jdbc:h2:tasks;MVCC=true;DB_CLOSE_ON_EXIT=TRUE");
@@ -258,6 +261,8 @@ public class VacationProcessTest {
 		// Retrieve Service and Session
 		TaskService taskService = engine.getTaskService();
 		final KieSession ksession = engine.getKieSession();
+		KnowledgeRuntimeLoggerFactory
+				.newConsoleLogger((KnowledgeRuntimeEventManager) ksession);
 
 		// Error tracking
 		List<Message> messages = new ArrayList<Message>();
@@ -315,6 +320,10 @@ public class VacationProcessTest {
 		Assert.assertEquals("State is not Active",
 				ProcessInstance.STATE_ACTIVE, processInstance.getState());
 
+		Assert.assertTrue("The request should not has Pending Approvals",
+				operatorRequest.hasPendingApprovals());
+		Assert.assertEquals(1, operatorRequest.getApprovals().size());
+
 		// The Operator has requested a leave, and his direct supervisor will
 		// work on the human task
 		String approverId = String.valueOf(operator.getDirectSupervisor()
@@ -337,16 +346,46 @@ public class VacationProcessTest {
 		Assert.assertEquals(
 				"After starting Approval Task, it's status is not In Progress",
 				Status.InProgress, approvalTask.getTaskData().getStatus());
-		taskService.complete(approvalTask.getId(), approverId, null);
+
+		// HUMAN TASK - Change Type to ROLLBACK_MANAGER
+		Map<String, Object> approvalTaskContent = getTaskContentMap(
+				environment, taskService, approvalTask);
+		LeaveApproval leaveApproval = (LeaveApproval) approvalTaskContent
+				.get("in_approval");
+		logger.debug("====> Changing LeaveApproval to ApproalType.ROLLBACK_MANAGER");
+		leaveApproval.setType(ApprovalType.ROLLBACK_MANAGER);
+		Map<String, Object> managerApprovalOutput = new HashMap<String, Object>(
+				1);
+		managerApprovalOutput.put("out_approval", leaveApproval);
+		logger.debug("====> Completing User Task...");
+		taskService.complete(approvalTask.getId(), approverId,
+				managerApprovalOutput);
+
+		Assert.assertFalse("The request should not has Pending Approvals",
+				operatorRequest.hasPendingApprovals());
 		// Refresh task data
 		approvalTask = taskService.getTaskById(approvalTasksSum.get(0).getId());
 		Assert.assertEquals(
 				"After starting Approval Task, it's status is not Completed",
 				Status.Completed, approvalTask.getTaskData().getStatus());
 
-		// TODO: Continue human task
+		Assert.assertEquals("State is not Completed",
+				ProcessInstance.STATE_COMPLETED, processInstance.getState());
 
+		assertWorkItemsTriggered("Manager Approval", "Rollback Form to Direct Manager");
+		
+		logger.debug("====> Disposing RuntimeEngine....");
 		manager.disposeRuntimeEngine(engine);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> getTaskContentMap(
+			RuntimeEnvironment environment, TaskService taskService, Task task) {
+		byte[] taskContentBytes = taskService.getContentById(
+				task.getTaskData().getDocumentContentId()).getContent();
+		Object taskContent = ContentMarshallerHelper.unmarshall(
+				taskContentBytes, environment.getEnvironment());
+		return (Map<String, Object>) taskContent;
 	}
 
 	private void addEventListenerRuleflowGroup(final KieSession ksession) {
@@ -373,7 +412,7 @@ public class VacationProcessTest {
 		Assert.assertEquals(workItemNames.length, triggeredWorkItemNodes.size());
 		for (String name : workItemNames) {
 			Assert.assertTrue(
-					"Work Item " + name + " has not been triggered!!",
+					"Work Item " + name + " has not been triggered!! Triggered Work Item Nodes: " + triggeredWorkItemNodes,
 					triggeredWorkItemNodes.contains(name));
 		}
 	}
@@ -407,24 +446,31 @@ public class VacationProcessTest {
 		}
 
 		public void beforeNodeTriggered(ProcessNodeTriggeredEvent event) {
+			logger.debug("=====> Before node triggered: "
+					+ event.getNodeInstance().getNode().getClass() + " -- "
+					+ event.getNodeInstance().getNodeName());
 		}
 
 		public void beforeNodeLeft(ProcessNodeLeftEvent event) {
 		}
 
 		public void afterVariableChanged(ProcessVariableChangedEvent event) {
+			logger.debug("====> Variable " + event.getVariableInstanceId()
+					+ " has changed its value from " + event.getOldValue()
+					+ " to " + event.getNewValue());
 		}
 
 		public void afterProcessStarted(ProcessStartedEvent event) {
+			logger.debug("=====> Starting process: "
+					+ event.getProcessInstance().getProcessName());
 		}
 
 		public void afterProcessCompleted(ProcessCompletedEvent event) {
+			logger.debug("=====> Completed process: "
+					+ event.getProcessInstance().getProcessName());
 		}
 
 		public void afterNodeTriggered(ProcessNodeTriggeredEvent event) {
-			// logger.info(" == > TRIGGERED node "
-			// + event.getNodeInstance().getNode().getClass() + " ---- "
-			// + event.getNodeInstance().getNodeName());
 			if (event.getNodeInstance().getNode() instanceof WorkItemNode) {
 				triggeredWorkItemNodes.add(((WorkItemNode) event
 						.getNodeInstance().getNode()).getName());

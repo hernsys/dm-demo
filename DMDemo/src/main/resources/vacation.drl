@@ -60,9 +60,10 @@ ruleflow-group "leave-rules"
 		WorkflowProcessInstanceImpl($v:variables["approvals"])
 		$approvals:List(this==$v)
 	then
-		logger.debug("==================> " + $approvals.size);
-		logger.debug("\n\n\n<<<< Clearing approvals collection >>>>>");
-		$approvals.clear();
+		logger.debug("==================> Leave Rules " + $approvals.size);
+		for (LeaveApproval a:$approvals) {
+			logger.debug("\t==> " + a);
+		}
 end
 
 

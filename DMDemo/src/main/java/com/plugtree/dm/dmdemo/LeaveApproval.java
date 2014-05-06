@@ -1,6 +1,7 @@
 package com.plugtree.dm.dmdemo;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * The Approval of a LeaveRequest by an Approver.
@@ -10,6 +11,10 @@ import java.io.Serializable;
  */
 public class LeaveApproval implements Serializable {
 	private static final long serialVersionUID = 772912663993617202L;
+	private static final AtomicLong idSeq = new AtomicLong(0);
+	
+	private final long id = idSeq.incrementAndGet();
+
 	private ApprovalType type;
 	private Employee approver;
 	private LeaveRequest request;
@@ -26,6 +31,10 @@ public class LeaveApproval implements Serializable {
 		this.type = ApprovalType.PENDING;
 	}
 	
+	public long getId() {
+		return id;
+	}
+
 	public ApprovalType getType() {
 		return type;
 	}
@@ -47,7 +56,7 @@ public class LeaveApproval implements Serializable {
 	
 	@Override
 	public String toString() {
-		return "[LeaveApproval = " + request.getType() + " - " + approver.getName() +"]";
+		return "[LeaveApproval = " + type + " - " + approver.getName() +"]";
 	}
 
 	public static LeaveApproval newDirectSupervisorLeaveApproval(LeaveRequest leaveRequest) {
