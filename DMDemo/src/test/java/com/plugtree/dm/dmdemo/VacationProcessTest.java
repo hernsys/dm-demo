@@ -2,6 +2,7 @@ package com.plugtree.dm.dmdemo;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,6 +109,13 @@ public class VacationProcessTest {
 		}
 	}
 
+	/**
+	 * Test scenario:<br>
+	 * <ul>
+	 * <li>Business Process starts without a Leave Request
+	 * <li>Error will be displayed and process aborted
+	 * </ul>
+	 */
 	@Test
 	public void testLeaveRequestNotFound() {
 		logger.info("======== Test Case: Leave Request Not Found ========");
@@ -152,6 +160,13 @@ public class VacationProcessTest {
 		ksession.dispose();
 	}
 
+	/**
+	 * Test scenario:<br>
+	 * <ul>
+	 * <li>Employee requests a Leave with invalid dates
+	 * <li>Error will be displayed and process aborted
+	 * </ul>
+	 */
 	@Test
 	public void testPlannedDatesInvalid() {
 		logger.info("======== Test Case: Planned Dates Invalid ========");
@@ -218,6 +233,14 @@ public class VacationProcessTest {
 		ksession.dispose();
 	}
 
+	/**
+	 * Test scenario:<br>
+	 * <ul>
+	 * <li>Employee requests a Leave
+	 * <li>Direct Manager will Rollback the Form to Manager
+	 * <li>Subprocesses will be executed based on the Rollback status
+	 * </ul>
+	 */
 	@Test
 	public void testManagerApprovalHumanTask() {
 		logger.info("======== Test Case: Manager Approval Human Task ========");
@@ -233,27 +256,7 @@ public class VacationProcessTest {
 		userGroups.put(String.valueOf(president.getId()), "approvers");
 		userGroups.put(String.valueOf(ceo.getId()), "approvers");
 
-		// Environment Configuration
-		RuntimeEnvironment environment = RuntimeEnvironmentBuilder.Factory
-				.get()
-				.newDefaultInMemoryBuilder()
-				.entityManagerFactory(
-						Persistence
-								.createEntityManagerFactory("org.jbpm.persistence.jpa"))
-				.userGroupCallback(new JBossUserGroupCallbackImpl(userGroups))
-				.addAsset(
-						ResourceFactory
-								.newClassPathResource("VacationProcess.bpmn2"),
-						ResourceType.BPMN2)
-				.addAsset(
-						ResourceFactory.newClassPathResource("HRProcess.bpmn2"),
-						ResourceType.BPMN2)
-				.addAsset(
-						ResourceFactory
-								.newClassPathResource("HRVacation.bpmn2"),
-						ResourceType.BPMN2)
-				.addAsset(ResourceFactory.newClassPathResource("vacation.drl"),
-						ResourceType.DRL).get();
+		RuntimeEnvironment environment = createRuntimeEnvironment(userGroups);
 		// Manager and Engine Configuration
 		RuntimeManager manager = RuntimeManagerFactory.Factory.get()
 				.newSingletonRuntimeManager(environment);
@@ -372,10 +375,271 @@ public class VacationProcessTest {
 		Assert.assertEquals("State is not Completed",
 				ProcessInstance.STATE_COMPLETED, processInstance.getState());
 
-		assertWorkItemsTriggered("Manager Approval", "Rollback Form to Direct Manager");
-		
+		assertWorkItemsTriggered("Manager Approval",
+				"Rollback Form to Direct Manager");
+
 		logger.debug("====> Disposing RuntimeEngine....");
 		manager.disposeRuntimeEngine(engine);
+		manager.close();
+	}
+
+	/**
+	 * Test scenario:<br>
+	 * <ul>
+	 * <li>Employee requests a Leave
+	 * <li>Direct Manager will send the request for a Review
+	 * <li>Reviewer will Reject the request
+	 * <li>Direct Manager will keep the request as Rejected
+	 * <li>Subprocesses will be executed based  on the Rejected status
+	 * </ul>
+	 */
+	@Test
+	public void testReviewRequiredHumanTask() {
+		logger.info("======== Test Case: Review Required Human Task ========");
+
+		AtomicInteger id = new AtomicInteger(1);
+		// Create Company hierarchy
+		Employee president = createPresident(id);
+		Employee ceo = createCEO(id, "NameOfVP_1", president);
+		Employee operator = createOperator(id, ceo);
+
+		// Register the users so they can claim human tasks
+		Properties userGroups = new Properties();
+		userGroups.put(String.valueOf(president.getId()), "approvers");
+		userGroups.put(String.valueOf(ceo.getId()), "approvers");
+
+		RuntimeEnvironment environment = createRuntimeEnvironment(userGroups);
+		// Manager and Engine Configuration
+		RuntimeManager manager = RuntimeManagerFactory.Factory.get()
+				.newSingletonRuntimeManager(environment);
+		RuntimeEngine engine = manager.getRuntimeEngine(EmptyContext.get());
+		// Retrieve Service and Session
+		TaskService taskService = engine.getTaskService();
+		final KieSession ksession = engine.getKieSession();
+		KnowledgeRuntimeLoggerFactory
+				.newConsoleLogger((KnowledgeRuntimeEventManager) ksession);
+
+		// Error tracking
+		List<Message> messages = new ArrayList<Message>();
+		ksession.setGlobal("messages", messages);
+		ksession.setGlobal("logger", logger);
+
+		// Add Work item handlers for service and human tasks
+		registerWorkItemHandlers(ksession);
+		LocalHTWorkItemHandler htHandler = new LocalHTWorkItemHandler();
+		htHandler.setRuntimeManager(manager);
+		ksession.getWorkItemManager().registerWorkItemHandler(HUMAN_TASK,
+				htHandler);
+
+		// Register Listener for testing purposes
+		ksession.addEventListener(new TestProcessEventListener());
+		addEventListenerRuleflowGroup(ksession);
+
+		// Operator requests Annual Leave without payment
+		LeaveRequest operatorRequest = createOperatorRequestBuilder(operator,
+				LeaveType.ANNUAL, false).build();
+
+		// Add Globals
+		ksession.setGlobal("vacationDepartment",
+				CompensationDepartment.VACATION);
+		Employee hrvp = createHRVP(id, president);
+		ksession.setGlobal("hrvp", hrvp);
+
+		// Start the process, with the Operator's leave request
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("leaveRequest", operatorRequest);
+		params.put("requestType", LeaveRequest.Type.CANCEL);
+		params.put("hasTravel", Boolean.TRUE);
+		params.put("requiresHRDirector", Boolean.FALSE);
+		params.put("requiresHR", Boolean.FALSE);
+		params.put("approvalType", ApprovalType.ROLLBACK_MANAGER);
+
+		// Insert into the session the list of Leave request approvals
+		params.put("approvals", operatorRequest.getApprovals());
+
+		WorkflowProcessInstance processInstance = (RuleFlowProcessInstance) ksession
+				.createProcessInstance(VACATION_PROCESS_ID, params);
+		// Assert process created
+		Assert.assertNotNull(processInstance);
+		Assert.assertEquals(ProcessInstance.STATE_PENDING,
+				processInstance.getState());
+
+		// Insert the Process session into the KieSession, so rules can do their
+		// job
+		ksession.insert(processInstance);
+
+		ksession.startProcessInstance(processInstance.getId());
+
+		// Assert that the Process is still active and the Manager Approval has
+		// been triggered
+		Assert.assertEquals("State is not Active",
+				ProcessInstance.STATE_ACTIVE, processInstance.getState());
+
+		Assert.assertTrue("The request should not has Pending Approvals",
+				operatorRequest.hasPendingApprovals());
+		Assert.assertEquals(1, operatorRequest.getApprovals().size());
+
+		/*
+		 * HUMAN TASK: Manager Approval - Change Type to REVIEW_REQUIRED
+		 */
+		// The Operator has requested a leave, and his direct supervisor will
+		// work on the human task
+		String approverId = String.valueOf(operator.getDirectSupervisor()
+				.getId());
+		List<TaskSummary> approvalTasksSum = taskService.getTasksOwned(
+				approverId, "en-UK");
+		Assert.assertEquals(
+				"Direct Supervisor does not have one available task for him",
+				1, approvalTasksSum.size());
+		// Get Task
+		Task approvalTask = taskService.getTaskById(approvalTasksSum.get(0)
+				.getId());
+		// The task should be already reserved to the Direct Supervisor
+		Assert.assertEquals("Approval Task is not Reserved", Status.Reserved,
+				approvalTask.getTaskData().getStatus());
+		// Start the task
+		taskService.start(approvalTask.getId(), approverId);
+		// Refresh task data
+		approvalTask = taskService.getTaskById(approvalTasksSum.get(0).getId());
+		Assert.assertEquals(
+				"After starting Approval Task, it's status is not In Progress",
+				Status.InProgress, approvalTask.getTaskData().getStatus());
+
+		Map<String, Object> approvalTaskContent = getTaskContentMap(
+				environment, taskService, approvalTask);
+		LeaveApproval leaveApproval = (LeaveApproval) approvalTaskContent
+				.get("in_approval");
+		logger.debug("====> Manager Approval: changing LeaveApproval to ApproalType.REVIEW_REQUIRED");
+		leaveApproval.setType(ApprovalType.REVIEW_REQUIRED);
+		Map<String, Object> managerApprovalOutput = new HashMap<String, Object>(
+				1);
+		managerApprovalOutput.put("out_approval", leaveApproval);
+		logger.debug("====> Completing Manager Approval User Task...");
+		taskService.complete(approvalTask.getId(), approverId,
+				managerApprovalOutput);
+
+		/*
+		 * HUMAN TASK: Review Required - Change Type to REJECTED
+		 */
+		// Get the Manager of the operator's direct supervisor
+		String reviewerId = String.valueOf(operator.getDirectSupervisor()
+				.getDirectSupervisor().getId());
+		List<TaskSummary> reviewTasksSum = taskService.getTasksOwned(
+				reviewerId, "en-UK");
+		Assert.assertEquals(
+				"Reviewer does not have one available task for him", 1,
+				reviewTasksSum.size());
+		// Get Task
+		Task reviewTask = taskService
+				.getTaskById(reviewTasksSum.get(0).getId());
+		// The task should be already reserved to the Reviewer
+		Assert.assertEquals("Review Task is not Reserved", Status.Reserved,
+				reviewTask.getTaskData().getStatus());
+		// Start the task
+		taskService.start(reviewTask.getId(), reviewerId);
+		// Refresh task data
+		reviewTask = taskService.getTaskById(reviewTasksSum.get(0).getId());
+		Assert.assertEquals(
+				"After starting Review Task, it's status is not In Progress",
+				Status.InProgress, reviewTask.getTaskData().getStatus());
+		Map<String, Object> reviewTaskContent = getTaskContentMap(environment,
+				taskService, reviewTask);
+		leaveApproval = (LeaveApproval) reviewTaskContent.get("in_approval");
+		logger.debug("====> Review required: changing LeaveApproval to ApproalType.REJECTED");
+		leaveApproval.setType(ApprovalType.REJECTED);
+		Map<String, Object> reviewRequiredOutput = new HashMap<String, Object>(
+				1);
+		reviewRequiredOutput.put("out_approval", leaveApproval);
+		logger.debug("====> Completing Revier Required User Task...");
+		taskService.complete(reviewTask.getId(), reviewerId,
+				reviewRequiredOutput);
+		// Refresh task data
+		reviewTask = taskService.getTaskById(reviewTasksSum.get(0).getId());
+		Assert.assertEquals(
+				"After completing Review Task, it's status is not Completed",
+				Status.Completed, reviewTask.getTaskData().getStatus());
+
+		/*
+		 * HUMAN TASK: Manager Approval - Change Type to ROLLBACK_MANAGER
+		 */
+		approvalTasksSum = taskService.getTasksOwned(approverId, "en-UK");
+		// User now has two tasks owned: the completed before the review and the new one after the review
+		Assert.assertEquals(
+				"Direct Supervisor does not have two tasks owned by him",
+				2, approvalTasksSum.size());
+		// We want to work on the Task that is in Reserved status
+		approvalTasksSum = taskService.getTasksOwnedByStatus(approverId, Arrays.asList(Status.Reserved), "en-UK");
+		Assert.assertEquals(
+				"Direct Supervisor does not have one reserved task for him",
+				1, approvalTasksSum.size());
+		// Get Task
+		approvalTask = taskService.getTaskById(approvalTasksSum.get(0)
+				.getId());
+		// The task should be already reserved to the Direct Supervisor
+		Assert.assertEquals("Approval Task is not Reserved", Status.Reserved,
+				approvalTask.getTaskData().getStatus());
+		// Start the task
+		taskService.start(approvalTask.getId(), approverId);
+		// Refresh task data
+		approvalTask = taskService.getTaskById(approvalTasksSum.get(0).getId());
+		Assert.assertEquals(
+				"After starting Approval Task, it's status is not In Progress",
+				Status.InProgress, approvalTask.getTaskData().getStatus());
+
+		approvalTaskContent = getTaskContentMap(environment, taskService,
+				approvalTask);
+		leaveApproval = (LeaveApproval) approvalTaskContent.get("in_approval");
+		logger.debug("====> Changing LeaveApproval to ApproalType.ROLLBACK_MANAGER");
+		leaveApproval.setType(ApprovalType.ROLLBACK_MANAGER);
+		managerApprovalOutput = new HashMap<String, Object>(1);
+		managerApprovalOutput.put("out_approval", leaveApproval);
+		logger.debug("====> Completing User Task...");
+		taskService.complete(approvalTask.getId(), approverId,
+				managerApprovalOutput);
+		// Refresh task data
+		reviewTask = taskService.getTaskById(approvalTasksSum.get(0).getId());
+		Assert.assertEquals(
+				"After completing Approval Task, it's status is not Completed",
+				Status.Completed, reviewTask.getTaskData().getStatus());
+
+		Assert.assertFalse("The request should not has Pending Approvals",
+				operatorRequest.hasPendingApprovals());
+
+		Assert.assertEquals("State is not Completed",
+				ProcessInstance.STATE_COMPLETED, processInstance.getState());
+
+		assertWorkItemsTriggered("Manager Approval", "Review required",
+				"Manager Approval", "Rollback Form to Direct Manager");
+
+		logger.debug("====> Disposing RuntimeEngine....");
+
+		manager.disposeRuntimeEngine(engine);
+		manager.close();
+	}
+
+	private RuntimeEnvironment createRuntimeEnvironment(Properties userGroups) {
+		// Environment Configuration
+		RuntimeEnvironment environment = RuntimeEnvironmentBuilder.Factory
+				.get()
+				.newDefaultInMemoryBuilder()
+				.entityManagerFactory(
+						Persistence
+								.createEntityManagerFactory("org.jbpm.persistence.jpa"))
+				.userGroupCallback(new JBossUserGroupCallbackImpl(userGroups))
+				.addAsset(
+						ResourceFactory
+								.newClassPathResource("VacationProcess.bpmn2"),
+						ResourceType.BPMN2)
+				.addAsset(
+						ResourceFactory.newClassPathResource("HRProcess.bpmn2"),
+						ResourceType.BPMN2)
+				.addAsset(
+						ResourceFactory
+								.newClassPathResource("HRVacation.bpmn2"),
+						ResourceType.BPMN2)
+				.addAsset(ResourceFactory.newClassPathResource("vacation.drl"),
+						ResourceType.DRL).get();
+		return environment;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -404,16 +668,19 @@ public class VacationProcessTest {
 
 	/**
 	 * Asserts that the work items that were triggered have the name of the
-	 * strings sent as parameter
+	 * strings sent as parameter, in the same order
 	 * 
 	 * @param workItemNames
 	 */
 	private void assertWorkItemsTriggered(String... workItemNames) {
 		Assert.assertEquals(workItemNames.length, triggeredWorkItemNodes.size());
-		for (String name : workItemNames) {
+		for (int i = 0; i < workItemNames.length; i++) {
 			Assert.assertTrue(
-					"Work Item " + name + " has not been triggered!! Triggered Work Item Nodes: " + triggeredWorkItemNodes,
-					triggeredWorkItemNodes.contains(name));
+					"Work Item "
+							+ workItemNames[i]
+							+ " has not been triggered as expected!! Triggered Work Item Nodes: "
+							+ triggeredWorkItemNodes,
+					workItemNames[i].equals(triggeredWorkItemNodes.get(i)));
 		}
 	}
 
