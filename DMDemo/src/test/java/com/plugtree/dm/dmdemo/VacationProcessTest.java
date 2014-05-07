@@ -27,6 +27,7 @@ import org.kie.api.event.process.ProcessNodeLeftEvent;
 import org.kie.api.event.process.ProcessNodeTriggeredEvent;
 import org.kie.api.event.process.ProcessStartedEvent;
 import org.kie.api.event.process.ProcessVariableChangedEvent;
+import org.kie.api.event.rule.AfterMatchFiredEvent;
 import org.kie.api.event.rule.DefaultAgendaEventListener;
 import org.kie.api.event.rule.RuleFlowGroupActivatedEvent;
 import org.kie.api.io.ResourceType;
@@ -58,6 +59,7 @@ import com.plugtree.dm.dmdemo.handlers.HRDirectorHandler;
 import com.plugtree.dm.dmdemo.handlers.HumanResourcesHandler;
 import com.plugtree.dm.dmdemo.handlers.NotifyUserHandler;
 import com.plugtree.dm.dmdemo.handlers.RollbackFormToDirectManagerHandler;
+import com.plugtree.dm.dmdemo.handlers.RollbackFormToRequestorHandler;
 import com.plugtree.dm.dmdemo.handlers.TravelHandler;
 import com.plugtree.util.KieTestHelper;
 
@@ -389,7 +391,7 @@ public class VacationProcessTest {
 	 * <li>Employee requests a Leave
 	 * <li>Direct Manager will send the request for a Review
 	 * <li>Reviewer will Reject the request
-	 * <li>Direct Manager will change the Approval to Rollback Form to Manager
+	 * <li>Direct Manager will change the Approval to Rollback Form to Requestor
 	 * <li>Subprocesses will be executed based on the Status set by the Direct Manager
 	 * </ul>
 	 */
@@ -452,7 +454,7 @@ public class VacationProcessTest {
 		params.put("hasTravel", Boolean.TRUE);
 		params.put("requiresHRDirector", Boolean.FALSE);
 		params.put("requiresHR", Boolean.FALSE);
-		params.put("approvalType", ApprovalType.ROLLBACK_MANAGER);
+		params.put("approvalType", ApprovalType.ROLLBACK_REQUESTOR);
 
 		// Insert into the session the list of Leave request approvals
 		params.put("approvals", operatorRequest.getApprovals());
@@ -560,7 +562,7 @@ public class VacationProcessTest {
 				Status.Completed, reviewTask.getTaskData().getStatus());
 
 		/*
-		 * HUMAN TASK: Manager Approval - Change Type to ROLLBACK_MANAGER
+		 * HUMAN TASK: Manager Approval - Change Type to ROLLBACK_REQUESTOR
 		 */
 		approvalTasksSum = taskService.getTasksOwned(approverId, "en-UK");
 		// User now has two tasks owned: the completed before the review and the new one after the review
@@ -589,8 +591,8 @@ public class VacationProcessTest {
 		approvalTaskContent = getTaskContentMap(environment, taskService,
 				approvalTask);
 		leaveApproval = (LeaveApproval) approvalTaskContent.get("in_approval");
-		logger.debug("====> Changing LeaveApproval to ApproalType.ROLLBACK_MANAGER");
-		leaveApproval.setType(ApprovalType.ROLLBACK_MANAGER);
+		logger.debug("====> Changing LeaveApproval to ApproalType.ROLLBACK_REQUESTOR");
+		leaveApproval.setType(ApprovalType.ROLLBACK_REQUESTOR);
 		managerApprovalOutput = new HashMap<String, Object>(1);
 		managerApprovalOutput.put("out_approval", leaveApproval);
 		logger.debug("====> Completing User Task...");
@@ -609,7 +611,7 @@ public class VacationProcessTest {
 				ProcessInstance.STATE_COMPLETED, processInstance.getState());
 
 		assertWorkItemsTriggered("Manager Approval", "Review required",
-				"Manager Approval", "Rollback Form to Direct Manager");
+				"Manager Approval", "Rollback Form to Requestor");
 
 		logger.debug("====> Disposing RuntimeEngine....");
 
@@ -654,6 +656,12 @@ public class VacationProcessTest {
 
 	private void addEventListenerRuleflowGroup(final KieSession ksession) {
 		ksession.addEventListener(new DefaultAgendaEventListener() {
+			
+			@Override
+			public void afterMatchFired(AfterMatchFiredEvent event) {
+				logger.debug(">>> After match fired event: " + event.getMatch().getRule().getName());
+			}
+
 			@Override
 			public void afterRuleFlowGroupActivated(
 					RuleFlowGroupActivatedEvent event) {
@@ -688,6 +696,9 @@ public class VacationProcessTest {
 		ksession.getWorkItemManager().registerWorkItemHandler(
 				"RollbackFormToDirectManager",
 				new RollbackFormToDirectManagerHandler());
+		ksession.getWorkItemManager().registerWorkItemHandler(
+				"RollbackFormToRequestor",
+				new RollbackFormToRequestorHandler());
 		ksession.getWorkItemManager().registerWorkItemHandler(TRAVEL,
 				new TravelHandler());
 		ksession.getWorkItemManager().registerWorkItemHandler(HUMAN_RESOURCES,
