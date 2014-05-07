@@ -79,7 +79,7 @@ no-loop
     	$pi: WorkflowProcessInstanceImpl()
         $r:LeaveRequest(status == Status.OPEN, employee.role == Role.PRESIDENT) from $pi.variables["leaveRequest"]
     then
-        logger.debug("Hello Mr. President " + $r.employee + ". The HR VP will approve your request.");
+        logger.debug("==================> Hello Mr. President " + $r.employee + ". The HR VP will approve your request.");
         Collection approvals = (Collection) $pi.getVariable("approvals");
         approvals.add(LeaveApproval.newLeaveApproval($r, hrvp));
 end
@@ -90,7 +90,7 @@ ruleflow-group "select-approvers"
        	$pi: WorkflowProcessInstanceImpl();
         $r:LeaveRequest(status == Status.OPEN, employee.role != Role.PRESIDENT, employee.directSupervisor != null) from $pi.variables["leaveRequest"];
     then
-        logger.debug("Hello " + $r.employee + ". Your Direct Supervisor (" + $r.employee.directSupervisor + ") will approve your request.");
+        logger.debug("==================> Hello " + $r.employee + ". Your Direct Supervisor (" + $r.employee.directSupervisor + ") will approve your request.");
         Collection approvals = (Collection) $pi.getVariable("approvals");
         approvals.add(LeaveApproval.newDirectSupervisorLeaveApproval($r));
 end
@@ -103,7 +103,7 @@ ruleflow-group "select-approvers"
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.ANNUAL, requestPayment == false,
 						employee.role != Role.PRESIDENT) from $pi.variables["leaveRequest"];
 	then
-        logger.debug("Hello " + $r.employee + ". New requests for Annual leaves without salary must be approved by the following Compensation Departments: Vacation");
+        logger.debug("==================> Hello " + $r.employee + ". New requests for Annual leaves without salary must be approved by the following Compensation Departments: Vacation");
         $r.addCompensationDepartment(vacationDepartment);
 end
 
@@ -115,7 +115,7 @@ ruleflow-group "select-approvers"
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.ANNUAL, requestPayment == true,
 		employee.role != Role.PRESIDENT) from $pi.variables["leaveRequest"];
 	then
-        logger.debug("Hello " + $r.employee + ". New requests for Annual leaves with salary must be approved by the following Compensation Departments: Vacation, Payroll and Travel");
+        logger.debug("==================> Hello " + $r.employee + ". New requests for Annual leaves with salary must be approved by the following Compensation Departments: Vacation, Payroll and Travel");
         $r.addCompensationDepartment(payrollDepartment);
         $r.addCompensationDepartment(travelDepartment);
         $r.addCompensationDepartment(vacationDepartment);
@@ -129,7 +129,7 @@ ruleflow-group "select-approvers"
 		$r:LeaveRequest(status == Status.OPEN, type in (Type.MODIFY, Type.CANCEL), leaveType == LeaveType.ANNUAL, requestPayment == false,
 		employee.role != Role.PRESIDENT) from $pi.variables["leaveRequest"];
 	then
-        logger.debug("Hello " + $r.employee + ". Update/Cancel requests for Annual leaves without salary must be approved by the following Compensation Departments: Vacation, Travel");
+        logger.debug("==================> Hello " + $r.employee + ". Update/Cancel requests for Annual leaves without salary must be approved by the following Compensation Departments: Vacation, Travel");
         $r.addCompensationDepartment(vacationDepartment);
         $r.addCompensationDepartment(travelDepartment);
 end
@@ -141,7 +141,7 @@ ruleflow-group "select-approvers"
 		$r:LeaveRequest(status == Status.OPEN, type in (Type.MODIFY, Type.CANCEL), leaveType == LeaveType.ANNUAL, requestPayment == true,
 		employee.role != Role.PRESIDENT) from $pi.variables["leaveRequest"];
 	then
-        logger.debug("Hello " + $r.employee + ". Update/Cancel requests for Annual leaves with salary must be approved by the following Compensation Departments: Vacation, Travel, Payroll");
+        logger.debug("==================> Hello " + $r.employee + ". Update/Cancel requests for Annual leaves with salary must be approved by the following Compensation Departments: Vacation, Travel, Payroll");
         $r.addCompensationDepartment(payrollDepartment);
         $r.addCompensationDepartment(travelDepartment);
         $r.addCompensationDepartment(vacationDepartment);
@@ -155,7 +155,7 @@ ruleflow-group "select-approvers"
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.EDUCATION,
 								$e:employee, $e.role != Role.PRESIDENT) from $pi.variables["leaveRequest"];
 	then
-        logger.debug("Hello " + $r.employee + ". New requests for Education without salary Leave must approved by the GM, VP and the Vacation Compensation Department");
+        logger.debug("==================> Hello " + $r.employee + ". New requests for Education without salary Leave must approved by the GM, VP and the Vacation Compensation Department");
         Collection approvals = (Collection) $pi.getVariable("approvals");
         approvals.add(LeaveApproval.newLeaveApproval($r, $e.getSupervisor(Role.VICE_PRESIDENT)));
         Collection approvals = (Collection) $pi.getVariable("approvals");
@@ -170,7 +170,7 @@ ruleflow-group "select-approvers"
 		$pi: WorkflowProcessInstanceImpl();
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.EXAM, employee.role != Role.PRESIDENT) from $pi.variables["leaveRequest"];
 	then
-        logger.debug("Hello " + $r.employee + ". New requests for Exam Leaves must be approved by the following Compensation Departments: Vacation");
+        logger.debug("==================> Hello " + $r.employee + ". New requests for Exam Leaves must be approved by the following Compensation Departments: Vacation");
         $r.addCompensationDepartment(vacationDepartment);
 end
 
@@ -181,7 +181,7 @@ ruleflow-group "select-approvers"
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.EXCEPTIONAL,
 		plannedStartDate before [0d, 60d] plannedEndDate, employee.role != Role.PRESIDENT)  from $pi.variables["leaveRequest"];
 	then
-        logger.debug("Hello " + $r.employee + ". New requests for Exceptional Leaves (<=2 months) must also be approved by your GM and the following Compensation Departments: Vacation, Payroll");
+        logger.debug("==================> Hello " + $r.employee + ". New requests for Exceptional Leaves (<=2 months) must also be approved by your GM and the following Compensation Departments: Vacation, Payroll");
         Collection approvals = (Collection) $pi.getVariable("approvals");
         approvals.add(LeaveApproval.newLeaveApproval($r, $r.employee.getSupervisor(Role.GENERAL_MANAGER)));
         $r.addCompensationDepartment(vacationDepartment);
@@ -195,7 +195,7 @@ ruleflow-group "select-approvers"
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.EXCEPTIONAL,
 		plannedStartDate before [61d] plannedEndDate, employee.role != Role.PRESIDENT)  from $pi.variables["leaveRequest"];
 	then
-        logger.debug("Hello " + $r.employee + ". New requests for Exceptional Leaves (> 2 months) must also be approved by your GM, VP and the following Compensation Departments: Vacation, Payroll");
+        logger.debug("==================> Hello " + $r.employee + ". New requests for Exceptional Leaves (> 2 months) must also be approved by your GM, VP and the following Compensation Departments: Vacation, Payroll");
         Collection approvals = (Collection) $pi.getVariable("approvals");
         approvals.add(LeaveApproval.newLeaveApproval($r, $r.employee.getSupervisor(Role.GENERAL_MANAGER)));
         approvals.add(LeaveApproval.newLeaveApproval($r, $r.employee.getSupervisor(Role.VICE_PRESIDENT)));
@@ -210,7 +210,7 @@ ruleflow-group "select-approvers"
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.MARRIAGE,
 				employee.role != Role.PRESIDENT)  from $pi.variables["leaveRequest"];
 	then
-        logger.debug("Hello " + $r.employee + ". New requests for Marriage Leaves must be approved by the following Compensation Departments: Vacation");
+        logger.debug("==================> Hello " + $r.employee + ". New requests for Marriage Leaves must be approved by the following Compensation Departments: Vacation");
         $r.addCompensationDepartment(vacationDepartment);
 end
 
@@ -221,7 +221,7 @@ ruleflow-group "select-approvers"
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.PATERNITY,
 				employee.role != Role.PRESIDENT)  from $pi.variables["leaveRequest"];
 	then
-        logger.debug("Hello " + $r.employee + ". New requests for Paternity Leaves must be approved by the following Compensation Departments: Vacation");
+        logger.debug("==================> Hello " + $r.employee + ". New requests for Paternity Leaves must be approved by the following Compensation Departments: Vacation");
         $r.addCompensationDepartment(vacationDepartment);
 end
 
@@ -232,6 +232,6 @@ ruleflow-group "select-approvers"
 		$r:LeaveRequest(status == Status.OPEN, type == Type.NEW, leaveType == LeaveType.TRANSFER,
 				employee.role != Role.PRESIDENT)  from $pi.variables["leaveRequest"];
 	then
-        logger.debug("Hello " + $r.employee + ". New requests for Sports Leaves must be approved by the following Compensation Departments: Vacation");
+        logger.debug("==================> Hello " + $r.employee + ". New requests for Sports Leaves must be approved by the following Compensation Departments: Vacation");
         $r.addCompensationDepartment(vacationDepartment);
 end

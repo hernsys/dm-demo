@@ -101,7 +101,7 @@ public class VacationProcessTest {
 		}
 	}
 
-	@Test
+	//@Test
 	public void testLeaveRequestNotFound() {
 		logger.info("======== Test Case: Leave Request Not Found ========");
 		final KieSession ksession = KieTestHelper.createKieSession(
@@ -147,7 +147,7 @@ public class VacationProcessTest {
 		ksession.dispose();
 	}
 
-	@Test
+	//@Test
 	public void testPlannedDatesInvalid() {
 		logger.info("======== Test Case: Planned Dates Invalid ========");
 		final KieSession ksession = KieTestHelper.createKieSession(
