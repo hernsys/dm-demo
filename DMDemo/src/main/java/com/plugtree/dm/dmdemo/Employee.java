@@ -12,11 +12,13 @@ public class Employee implements Serializable {
 	private String phone;
 	private String email;
 	private BigDecimal basicSalary;
+	private Double salaryPercent = 1.0;
 	private Date jobStartDate;
 	private String position;
 	private Role role;
 	private Employee directSupervisor;
 	private List<Employee> reports;
+	private Integer level = 1;
 
 	public Employee() {
 
@@ -33,6 +35,8 @@ public class Employee implements Serializable {
 		this.role = builder.role;
 		this.directSupervisor = builder.directSupervisor;
 		this.reports = builder.reports;
+		this.salaryPercent = builder.salaryPercent;
+		this.level = builder.level;
 	}
 
 	
@@ -126,6 +130,14 @@ public class Employee implements Serializable {
 	public Employee getDirectSupervisor() {
 		return directSupervisor;
 	}
+	
+	public void setSalaryPercent(Double salaryPercent) {
+		this.salaryPercent = salaryPercent;
+	}
+	
+	public Double getSalaryPercent() {
+		return salaryPercent;
+	}
 
 	public void setDirectSupervisor(Employee directSupervisor) {
 		this.directSupervisor = directSupervisor;
@@ -139,6 +151,14 @@ public class Employee implements Serializable {
 		this.reports = reports;
 	}
 
+	public Integer getLevel() {
+		return level;
+	}
+	
+	public void setLevel(Integer level) {
+		this.level = level;
+	}
+	
 	public static class Builder {
 		private Integer id;
 		private String name;
@@ -150,6 +170,8 @@ public class Employee implements Serializable {
 		private Role role;
 		private Employee directSupervisor;
 		private List<Employee> reports;
+		private Double salaryPercent;
+		private Integer level;
 
 		public Builder(Integer id, String name) {
 			this.id = id;
@@ -165,6 +187,11 @@ public class Employee implements Serializable {
 			return this;
 		}
 
+		public Builder level(Integer level) {
+			this.level = level;
+			return this;
+		}
+		
 		public Builder email(String email) {
 			this.email = email;
 			return this;
@@ -180,6 +207,11 @@ public class Employee implements Serializable {
 			return this;
 		}
 
+		public Builder salaryPercent(Double percent) {
+			this.salaryPercent = percent;
+			return this;
+		}
+		
 		public Builder position(String position) {
 			this.position = position;
 			return this;

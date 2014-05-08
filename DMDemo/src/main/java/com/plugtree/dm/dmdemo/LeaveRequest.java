@@ -44,10 +44,31 @@ public class LeaveRequest implements Serializable {
 	private List<Employee> approvers = new ArrayList<Employee>();
 	private List<CompensationDepartment> compensationDepartments = new ArrayList<CompensationDepartment>();
 
+	private boolean fromExhaustedSickLeave = false;
+	private String institute;
+	private String relation;
+	
 	public LeaveRequest() {
 
 	}
 
+	public LeaveRequest(LeaveRequest other) {
+		this.employee = other.employee;
+		this.substitute = other.substitute;
+		this.leaveType = other.leaveType;
+		this.requestPayment = other.requestPayment;
+		this.plannedStartDate = other.plannedStartDate;
+		this.plannedEndDate = other.plannedEndDate;
+		this.actualStartDate = other.actualStartDate;
+		this.actualEndDate = other.actualEndDate;
+		this.absenceReason = other.absenceReason;
+		this.comments = other.comments;
+		this.status = other.status;
+		this.type = other.type;
+		this.institute = other.institute;
+		this.relation = other.relation;
+	}
+	
 	public LeaveRequest(Builder builder) {
 		this.employee = builder.employee;
 		this.substitute = builder.substitute;
@@ -61,8 +82,38 @@ public class LeaveRequest implements Serializable {
 		this.comments = builder.comments;
 		this.status = builder.status;
 		this.type = builder.type;
+		this.institute = builder.institute;
+		this.relation = builder.compasionateRelation;
+	}
+	
+	public void setInstitute(String institute) {
+		this.institute = institute;
+	}
+	
+	public String getInstitute() {
+		return institute;
 	}
 
+	public String getRelation() {
+		return relation;
+	}
+	
+	public void setRelation(String relation) {
+		this.relation = relation;
+	}
+
+	public void setFromExhaustedSickLeave(boolean fromExhaustedSickLeave) {
+		this.fromExhaustedSickLeave = fromExhaustedSickLeave;
+	}
+	
+	public boolean isFromExhaustedSickLeave() {
+		return fromExhaustedSickLeave;
+	}
+	
+	public boolean getFromExhaustedSickLeave() {
+		return fromExhaustedSickLeave;
+	}
+	
 	public boolean removeCompensationDepartment(
 			CompensationDepartment compensationDepartment) {
 		return compensationDepartments.remove(compensationDepartment);
@@ -229,11 +280,19 @@ public class LeaveRequest implements Serializable {
 		this.compensationDepartments = compensationDepartments;
 	}
 
-	public Double getTotalAbsenceDaysUntilNow() {
+	public Double getLeaveLength() {
+		Date actualEndDate = this.actualEndDate;
+		if (actualEndDate == null) {
+			actualEndDate = new Date();
+		}
 		long diff = actualEndDate.getTime() - actualStartDate.getTime();
 		double delta = (double) diff / 3600000.;
 		delta = delta / 24;
-		return absenceDays + delta;
+		return delta;
+	}
+	
+	public Double getTotalAbsenceDaysUntilNow() {
+		return absenceDays + getLeaveLength();
 	}
 	
 	public static class Builder {
@@ -249,6 +308,8 @@ public class LeaveRequest implements Serializable {
 		private String comments;
 		private Status status = Status.OPEN;
 		private Type type = Type.NEW;
+		private String institute;
+		private String compasionateRelation;
 
 		public Builder(Employee employee, LeaveType leaveType,
 				Boolean requestPayment) {
@@ -283,6 +344,16 @@ public class LeaveRequest implements Serializable {
 
 		public Builder actualEndDate(Date actualEndDate) {
 			this.actualEndDate = actualEndDate;
+			return this;
+		}
+		
+		public Builder institute(String institute) {
+			this.institute = institute;
+			return this;
+		}
+		
+		public Builder compasionateRelation(String compasionateRelation) {
+			this.compasionateRelation = compasionateRelation;
 			return this;
 		}
 

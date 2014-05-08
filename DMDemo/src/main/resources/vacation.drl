@@ -4,16 +4,24 @@ package com.plugtree.dm.dmdemo;
 import com.plugtree.dm.dmdemo.*;
 import org.jbpm.workflow.instance.impl.WorkflowProcessInstanceImpl;
 import function com.plugtree.dm.core.Message.*;
+import com.plugtree.dm.core.TimeUtils;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 global com.plugtree.dm.dmdemo.Employee hrvp;
+global com.plugtree.dm.dmdemo.Employee vp;//TODO
 global com.plugtree.dm.dmdemo.CompensationDepartment payrollDepartment;
 global com.plugtree.dm.dmdemo.CompensationDepartment travelDepartment;
 global com.plugtree.dm.dmdemo.CompensationDepartment vacationDepartment;
 global java.util.List messages;
 global org.slf4j.Logger logger;
+
+global com.plugtree.dm.dmdemo.service.PayrollService payrollService;//TODO
+global com.plugtree.dm.dmdemo.service.EmployeeService employeeService;//TODO
+global com.plugtree.dm.dmdemo.service.MedicalCommitteeService medicalCommitteeService;//TODO
 
 dialect "mvel"
 
@@ -48,6 +56,20 @@ no-loop
    		update($pi);
 end
 
+rule "HR Vacation Policy: not Annual leave, requesting advanced payment"
+//RelatedTo("BR-05")
+ruleflow-group "validate-inputs"
+salience 9999
+no-loop
+	when
+       	$pi: WorkflowProcessInstanceImpl()
+       	$r:LeaveRequest(leaveType != LeaveType.ANNUAL, requestPayment == true) from $pi.variables["leaveRequest"] 
+    then
+    	//Reject as invalid
+   		$pi.setVariable("validInputs", Boolean.FALSE);
+   		messages.add(newErrorMessage("HR Vacation Policy: Only Annual leaves can request advanced payment"));
+   		update($pi);
+end
 
 /**
 
@@ -67,7 +89,6 @@ ruleflow-group "leave-rules"
 			logger.debug("\t==> " + a);
 		}
 end
-
 
 /**
 
@@ -238,6 +259,464 @@ ruleflow-group "select-approvers"
         logger.debug("Hello " + $r.employee + ". New requests for Sports Leaves must be approved by the following Compensation Departments: Vacation");
         $r.addCompensationDepartment(vacationDepartment);
 end
+
+rule "HR Vacation Policy: Unpaid/Emergency  leave, less than 10 days"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(status == Status.OPEN, type == Type.NEW, 
+			leaveType == LeaveType.UNPAID || == LeaveType.EMERGENCY,
+			$leaveLength: leaveLength < 10, $emp: employee)
+	then
+		//Basic Salary + Transportation Allowace for the number of leave days to be deducted from employee's payroll
+		payrollService.deductSalaryWithTransportation($emp, $leaveLength);
+end
+
+rule "HR Vacation Policy: Unpaid/Emergency  leave, 10 days or more"
+//RelatedTo("BR-05")
+	when
+		LeaveRequest(status == Status.OPEN, type == Type.NEW, 
+			leaveType == LeaveType.UNPAID || == LeaveType.EMERGENCY,
+			$leaveLength: leaveLength >= 10, $emp: employee)
+	then
+		//Basic Salary + all allowances for the number of leave days to be deducted from employee's payroll
+		payrollService.deductSalaryWithAllAllowances($emp, $leaveLength);
+end
+
+rule "HR Vacation Policy: Unpaid/Emergency leave, 15 days or more"
+//RelatedTo("BR-05")
+	when
+		LeaveRequest(status == Status.OPEN, type == Type.NEW, 
+			leaveType == LeaveType.UNPAID || == LeaveType.EMERGENCY,
+			leaveLength >= 15, $emp: employee)
+	then
+		//Suspend employee's assignment until he/she returns
+		employeeService.suspendEmployeeAssignment($emp);
+end
+
+rule "HR Vacation Policy: Sick leave, first 30 days in the last year to date"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$now: Date()
+		$lr: LeaveRequest(type == Type.NEW,
+			leaveType == LeaveType.SICK,
+			employee.salaryPercent < 1.0, 
+			$emp: employee,
+			totalAbsenceDaysUntilNow <= 30)
+	then
+		//Employee earns full basic salary
+		employeeService.setSalaryPercent($emp, 1.0);
+		$emp.setSalaryPercent(1.0);
+		update($lr);
+end
+
+rule "HR Vacation Policy: Sick leave, days 31 to 90 in the last year to date"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			leaveType == LeaveType.SICK,
+			employee.salaryPercent < 0.74 && > 0.76, 
+			$emp: employee,
+			totalAbsenceDaysUntilNow > 30 && <= 90)
+	then
+		//Employee earns 75% of basic salary
+		employeeService.setSalaryPercent($emp, 0.75);
+		$emp.setSalaryPercent(0.75);
+		update($lr);
+end
+
+rule "HR Vacation Policy: Sick leave, after day 90 in the last year to date"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			leaveType == LeaveType.SICK, 
+			$emp: employee,
+			totalAbsenceDaysUntilNow > 90)
+	then
+		LeaveRequest lr2 = new LeaveRequest($lr);
+		lr2.setLeaveType(LeaveType.ANNUAL);
+		lr2.setActualStartDate(new Date());
+		lr2.setActualEndDate(null);
+		lr2.setFromExhaustedSickLeave(true);
+		Employee $emp = lr2.getEmployee();
+		//Employee starts using ANNUAL leave balance
+		employeeService.setSalaryPercent($emp, 1.0);
+		$emp.setSalaryPercent(1.0);
+		delete($lr);
+		insert(lr2);
+end
+
+rule "HR Vacation Policy: Sick leave, all balances consumed, grade under 25"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			leaveType == LeaveType.ANNUAL,
+			$emp: employee,
+			fromExhaustedSickLeave == true,
+			employee.level < 25, totalAbsenceDaysUntilNow > 15
+		)
+	then
+		//Delegated to medical committee
+		medicalCommitteeService.startEmployeeMedicalReview($emp);
+end
+
+rule "HR Vacation Policy: Sick leave, all balances consumed, grade from 25 to 35"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			leaveType == LeaveType.ANNUAL,
+			$emp: employee,
+			fromExhaustedSickLeave == true,
+			employee.level >= 25 && < 35, totalAbsenceDaysUntilNow > 30
+		)
+	then
+		//Delegated to medical committee
+		medicalCommitteeService.startEmployeeMedicalReview($emp);
+end
+
+rule "HR Vacation Policy: Sick leave, all balances consumed, grade from 36 to 49"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			leaveType == LeaveType.ANNUAL,
+			$emp: employee,
+			fromExhaustedSickLeave == true,
+			employee.level >= 35 && < 49, totalAbsenceDaysUntilNow > 35
+		)
+	then
+		//Delegated to medical committee
+		medicalCommitteeService.startEmployeeMedicalReview($emp);
+end
+
+rule "HR Vacation Policy: Annual leave, grade under 25"
+ruleflow-group "validate-inputs"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			leaveType == LeaveType.ANNUAL,
+			$emp: employee,
+			fromExhaustedSickLeave == true,
+			employee.level < 25, totalAbsenceDaysUntilNow > 15
+		)
+	then
+		//15 days/Contractual Year as total annual leave. Reject otherwise
+		messages.add(newErrorMessage("Employees under level 25 have only 15 days available for annual leave"));
+end
+
+rule "HR Vacation Policy: Annual leave, grade 25 to 35"
+ruleflow-group "validate-inputs"
+//RelatedTo("BR-05")
+	when
+	$lr: LeaveRequest(type == Type.NEW,
+			leaveType == LeaveType.ANNUAL,
+			$emp: employee,
+			fromExhaustedSickLeave == true,
+			employee.level >= 25 && < 35, totalAbsenceDaysUntilNow > 30
+		)
+	then
+		//30 days/Contractual Year as total annual leave
+		messages.add(newErrorMessage("Employees on level 26 to 34 have only 30 days available for annual leave"));
+end
+
+rule "HR Vacation Policy: Annual leave, grade 37 o 49"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+	$lr: LeaveRequest(type == Type.NEW,
+			leaveType == LeaveType.ANNUAL,
+			$emp: employee,
+			fromExhaustedSickLeave == true,
+			employee.level >= 35 && < 49, totalAbsenceDaysUntilNow > 35
+		)
+	then
+		//35 days/Contractual Year as total annual leave
+		messages.add(newErrorMessage("Employees on level 35 to 49 have only 35 days available for annual leave"));
+end
+
+rule "HR Vacation Policy: Compassionate leave for death over 3 days"
+ruleflow-group "validate-inputs"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			leaveType == LeaveType.COMPASIONATE,
+			$emp: employee, leaveLength > 3
+		)
+	then
+		//Reject
+		messages.add(newErrorMessage("Employees can have only 3 days for compassionate leave"));
+end
+
+rule "HR Vacation Policy: Marriage leave over 3 days"
+ruleflow-group "validate-inputs"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			leaveType == LeaveType.MARRIAGE,
+			$emp: employee, leaveLength > 3
+		)
+	then
+		//Reject
+		messages.add(newErrorMessage("Employees can have only 3 days for marriage leave"));
+end
+
+rule "HR Vacation Policy: Paternity leave for death over 1 days"
+ruleflow-group "validate-inputs"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			leaveType == LeaveType.PATERNITY,
+			$emp: employee, leaveLength > 1
+		)
+	then
+		//Reject
+		messages.add(newErrorMessage("Employees can have only 1 day for paternity leave"));
+end
+
+rule "HR Vacation Policy: Exam leave not from valid institute"
+ruleflow-group "validate-inputs"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.EXAM,
+			$ins: institute 
+		)
+		Boolean(booleanValue == true) from employeeService.isValidInstitute($ins)
+	then
+		//Reject
+		messages.add(newErrorMessage("Institute " + $lr.getInstitute() + " not a valid institute"));
+end
+
+rule "HR Vacation Policy: Education leave not from valid institute"
+ruleflow-group "validate-inputs"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.EDUCATION,
+			$ins: institute 
+		)
+		Boolean(booleanValue == true) from employeeService.isValidInstitute($ins)
+	then
+		//Reject
+		messages.add(newErrorMessage("Institute " + $lr.getInstitute() + " not a valid institute"));
+end
+
+rule "HR Vacation Policy: Exam leave over 20 days per year"
+ruleflow-group "validate-inputs"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.EXAM,
+			totalAbsenceDaysUntilNow > 20
+		)
+	then
+		//Reject
+		messages.add(newErrorMessage("employee only has 20 days per year for exam leave"));
+end
+
+rule "HR Vacation Policy: Education leave from employee < 2 years of service"
+ruleflow-group "validate-inputs"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.EDUCATION,
+			$startDate: employee.jobStartDate
+		)
+		eval (TimeUtils.timeAgo($startDate, TimeUnit.DAYS) < 730)
+	then
+		//Reject
+		messages.add(newErrorMessage("employee needs 2 years of service to ask for education leave"));
+end
+
+rule "HR Vacation Policy: Education leave from employee >= 2 years of service"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.EDUCATION,
+			$startDate: employee.jobStartDate
+		)
+		eval (TimeUtils.timeAgo($startDate, TimeUnit.DAYS) >= 730)
+	then
+		//Request approval from VP and HR VP
+		$lr.addApprover(hrvp);
+		$lr.addApprover(vp);
+end
+
+rule "HR Vacation Policy: Education leave from employee between 1-2 years"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.EDUCATION,
+			$startDate: employee.jobStartDate,
+			leaveLength > 365 && <= 730
+		)
+		eval (TimeUtils.timeAgo($startDate, TimeUnit.DAYS) >= 730)
+	then
+		//Request extension
+		$lr.setComments("Needs approval for extension to " + $lr.getLeaveLength() + " days");
+end
+
+rule "HR Vacation Policy: Company Day Leave for person not inside direct relation"
+ruleflow-group "validate-inputs"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.COMPANY_DAY,
+			leaveLength <= 3, relation not memberOf ["father", "mother", "brother", "sister", "son", "daughter", "wife"]
+		)
+	then
+		//Reject
+		messages.add(newErrorMessage("Company Day leave only available for father, motheer, brother, sister, son, daughter or wife"));
+end
+
+rule "HR Vacation Policy: Compassionate Leave for person not inside direct relation"
+ruleflow-group "validate-inputs"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.COMPANY_DAY,
+			leaveLength <= 3, relation not memberOf ["father", "mother", "brother", "sister", "son", "daughter", "wife"]
+		)
+	then
+		//Reject
+		messages.add(newErrorMessage("Compasionate leave only available for father, motheer, brother, sister, son, daughter or wife"));
+end
+
+
+
+
+
+
+
+
+
+/* TODO
+
+rule "HR Vacation Policy: Company Day Leave for person with > 60 days of annual leave balance"
+ruleflow-group "validate-inputs"
+//RelatedTo("BR-05")
+	when
+	
+	then
+		//Reject
+end
+
+rule "HR Vacation Policy: Company Day Leave inside country, first 30 days"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+	
+	then
+		//Full salary
+end
+
+rule "HR Vacation Policy: Company Day Leave inside country, days 31-75"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+	
+	then
+		//75% salary
+end
+
+rule "HR Vacation Policy: Company Day Leave outside country, first 45 days"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+	
+	then
+		//Full salary
+end
+
+rule "HR Vacation Policy: Company Day Leave inside country, days 46-105"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+	
+	then
+		//75% salary
+end
+
+rule "HR Vacation Policy: Company Day Leave requires GM approval"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		
+	then
+		//Add require approval of GM
+end
+
+rule "HR Vacation Policy: Exceptional Leave with GM approval over 2 months"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		
+	then
+		//Add require approval of VP
+end
+
+rule "HR Vacation Policy: Exceptional Leave with VP approval over 6 months on the last 3 years"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		
+	then
+		//Add require approval of GM
+end
+
+rule "HR Vacation Policy: Exceptional Leave requires GM approval"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		
+	then
+		//Add require approval of GM
+end
+
+rule "HR Vacation Policy: Transfer Leave under 100 km"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		
+	then
+		//Reject
+end
+
+rule "HR Vacation Policy: Transfer Leave over 100 km over 2 days"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		
+	then
+		//Reject
+end
+*/
+
+
+
+
+
+
+
+
+
+
+
 
 rule "Annual leave (without salary) with total days of sick leave is more than 30 days"
 ruleflow-group "select-approvers"
