@@ -47,6 +47,7 @@ public class LeaveRequest implements Serializable {
 	private boolean fromExhaustedSickLeave = false;
 	private String institute;
 	private String relation;
+	private boolean insideCountry = true;
 	
 	public LeaveRequest() {
 
@@ -67,6 +68,7 @@ public class LeaveRequest implements Serializable {
 		this.type = other.type;
 		this.institute = other.institute;
 		this.relation = other.relation;
+		this.insideCountry = other.insideCountry;
 	}
 	
 	public LeaveRequest(Builder builder) {
@@ -84,6 +86,7 @@ public class LeaveRequest implements Serializable {
 		this.type = builder.type;
 		this.institute = builder.institute;
 		this.relation = builder.compasionateRelation;
+		this.insideCountry = builder.insideCountry;
 	}
 	
 	public void setInstitute(String institute) {
@@ -102,6 +105,18 @@ public class LeaveRequest implements Serializable {
 		this.relation = relation;
 	}
 
+	public boolean isInsideCountry() {
+		return insideCountry;
+	}
+	
+	public void setInsideCountry(boolean insideCountry) {
+		this.insideCountry = insideCountry;
+	}
+	
+	public boolean getInsideCountry() {
+		return insideCountry;
+	}
+	
 	public void setFromExhaustedSickLeave(boolean fromExhaustedSickLeave) {
 		this.fromExhaustedSickLeave = fromExhaustedSickLeave;
 	}
@@ -310,6 +325,7 @@ public class LeaveRequest implements Serializable {
 		private Type type = Type.NEW;
 		private String institute;
 		private String compasionateRelation;
+		private Boolean insideCountry = Boolean.TRUE;
 
 		public Builder(Employee employee, LeaveType leaveType,
 				Boolean requestPayment) {
@@ -349,6 +365,11 @@ public class LeaveRequest implements Serializable {
 		
 		public Builder institute(String institute) {
 			this.institute = institute;
+			return this;
+		}
+		
+		public Builder insideCountry(Boolean insideCountry) {
+			this.insideCountry = insideCountry;
 			return this;
 		}
 		

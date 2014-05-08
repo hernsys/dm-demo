@@ -317,7 +317,7 @@ ruleflow-group "select-approvers"
 	when
 		$lr: LeaveRequest(type == Type.NEW,
 			leaveType == LeaveType.SICK,
-			employee.salaryPercent < 0.74 && > 0.76, 
+			employee.salaryPercent < 0.74 || > 0.76, 
 			$emp: employee,
 			totalAbsenceDaysUntilNow > 30 && <= 90)
 	then
@@ -597,6 +597,149 @@ ruleflow-group "validate-inputs"
 		messages.add(newErrorMessage("Compasionate leave only available for father, motheer, brother, sister, son, daughter or wife"));
 end
 
+rule "HR Vacation Policy: Company Day Leave for person with > 60 days of annual leave balance"
+ruleflow-group "validate-inputs"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.COMPANY_DAY,
+			leaveLength <= 3, relation memberOf ["father", "mother", "brother", "sister", "son", "daughter", "wife"]
+		)
+		eval (employeeService.getPendingDays($lr.getEmployee(), LeaveType.ANNUAL) > 60)
+	then
+		//Reject
+		messages.add(newErrorMessage("If you have over 60 days of annual leave available, you cannot take a compasionate leave"));
+end
+
+rule "HR Vacation Policy: Company Day Leave inside country, first 30 days"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.COMPANY_DAY,
+			$emp: employee,
+			employee.salaryPercent < 1.0,
+			leaveLength <= 3, relation memberOf ["father", "mother", "brother", "sister", "son", "daughter", "wife"],
+			$startDate: actualStartDate, insideCountry == true
+		)
+		eval (TimeUtils.timeAgo($startDate, TimeUnit.DAYS) < 30)
+	then
+		//Full salary
+		employeeService.setSalaryPercent($emp, 1.0);
+		$emp.setSalaryPercent(1.0);
+		update($lr);
+end
+
+rule "HR Vacation Policy: Company Day Leave inside country, days 31-75"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.COMPANY_DAY,
+			$emp: employee,
+			employee.salaryPercent < 0.74 || employee.salaryPercent > 0.76,
+			leaveLength <= 3, relation memberOf ["father", "mother", "brother", "sister", "son", "daughter", "wife"],
+			$startDate: actualStartDate, insideCountry == true
+		)
+		eval (TimeUtils.timeAgo($startDate, TimeUnit.DAYS) > 30 && TimeUtils.timeAgo($startDate, TimeUnit.DAYS) < 75)
+	then
+		//75% salary
+		employeeService.setSalaryPercent($emp, 0.75);
+		$emp.setSalaryPercent(0.75);
+		update($lr);
+end
+
+rule "HR Vacation Policy: Company Day Leave outside country, first 45 days"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.COMPANY_DAY,
+			$emp: employee,
+			employee.salaryPercent < 1.0,
+			leaveLength <= 3, relation memberOf ["father", "mother", "brother", "sister", "son", "daughter", "wife"],
+			$startDate: actualStartDate, insideCountry == false
+		)
+		eval (TimeUtils.timeAgo($startDate, TimeUnit.DAYS) < 45)
+	then
+		//Full salary
+		employeeService.setSalaryPercent($emp, 1.0);
+		$emp.setSalaryPercent(1.0);
+		update($lr);
+end
+
+rule "HR Vacation Policy: Company Day Leave inside country, days 46-105"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.COMPANY_DAY,
+			$emp: employee,
+			employee.salaryPercent < 0.74 || employee.salaryPercent > 0.76,
+			leaveLength <= 3, relation memberOf ["father", "mother", "brother", "sister", "son", "daughter", "wife"],
+			$startDate: actualStartDate, insideCountry == false
+		)
+		eval (TimeUtils.timeAgo($startDate, TimeUnit.DAYS) > 45 && TimeUtils.timeAgo($startDate, TimeUnit.DAYS) < 105)
+	then
+		//75% salary
+		employeeService.setSalaryPercent($emp, 0.75);
+		$emp.setSalaryPercent(0.75);
+		update($lr);
+end
+
+rule "HR Vacation Policy: Company Day Leave requires GM approval"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.COMPANY_DAY,
+			$emp: employee,
+			employee.salaryPercent < 0.74 || employee.salaryPercent > 0.76,
+			relation memberOf ["father", "mother", "brother", "sister", "son", "daughter", "wife"]
+		)
+	then
+		//Add require approval of GM
+		$lr.addApprover($lr.getEmployee().getGeneralManager());
+		update($lr);
+end
+
+rule "HR Vacation Policy: Exceptional Leave with GM approval"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.EXCEPTIONAL,
+			leaveLength <= 60
+		)
+	then
+		//Add require approval of GM
+		$lr.addApprover($lr.getEmployee().getGeneralManager());
+		update($lr);
+end
+
+rule "HR Vacation Policy: Exceptional Leave with GM approval over 2 months"
+ruleflow-group "select-approvers"
+//RelatedTo("BR-05")
+	when
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.EXCEPTIONAL,
+			leaveLength > 60
+		)
+	then
+		//Add require approval of VP
+		$lr.addApprover(vp);
+		update($lr);
+end
+
+
 
 
 
@@ -606,60 +749,6 @@ end
 
 
 /* TODO
-
-rule "HR Vacation Policy: Company Day Leave for person with > 60 days of annual leave balance"
-ruleflow-group "validate-inputs"
-//RelatedTo("BR-05")
-	when
-	
-	then
-		//Reject
-end
-
-rule "HR Vacation Policy: Company Day Leave inside country, first 30 days"
-ruleflow-group "select-approvers"
-//RelatedTo("BR-05")
-	when
-	
-	then
-		//Full salary
-end
-
-rule "HR Vacation Policy: Company Day Leave inside country, days 31-75"
-ruleflow-group "select-approvers"
-//RelatedTo("BR-05")
-	when
-	
-	then
-		//75% salary
-end
-
-rule "HR Vacation Policy: Company Day Leave outside country, first 45 days"
-ruleflow-group "select-approvers"
-//RelatedTo("BR-05")
-	when
-	
-	then
-		//Full salary
-end
-
-rule "HR Vacation Policy: Company Day Leave inside country, days 46-105"
-ruleflow-group "select-approvers"
-//RelatedTo("BR-05")
-	when
-	
-	then
-		//75% salary
-end
-
-rule "HR Vacation Policy: Company Day Leave requires GM approval"
-ruleflow-group "select-approvers"
-//RelatedTo("BR-05")
-	when
-		
-	then
-		//Add require approval of GM
-end
 
 rule "HR Vacation Policy: Exceptional Leave with GM approval over 2 months"
 ruleflow-group "select-approvers"
