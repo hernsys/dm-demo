@@ -229,6 +229,13 @@ public class LeaveRequest implements Serializable {
 		this.compensationDepartments = compensationDepartments;
 	}
 
+	public Double getTotalAbsenceDaysUntilNow() {
+		long diff = actualEndDate.getTime() - actualStartDate.getTime();
+		double delta = (double) diff / 3600000.;
+		delta = delta / 24;
+		return absenceDays + delta;
+	}
+	
 	public static class Builder {
 		private Employee employee;
 		private Employee substitute;
@@ -258,7 +265,7 @@ public class LeaveRequest implements Serializable {
 			this.requestPayment = requestPayment;
 			return this;
 		}
-
+		
 		public Builder plannedStartDate(Date plannedStartDate) {
 			this.plannedStartDate = plannedStartDate;
 			return this;

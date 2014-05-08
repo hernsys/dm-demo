@@ -5,6 +5,8 @@ import com.plugtree.dm.dmdemo.*;
 import org.jbpm.workflow.instance.impl.WorkflowProcessInstanceImpl;
 import function com.plugtree.dm.core.Message.*;
 import java.util.Collection;
+import java.util.Map;
+import java.util.HashMap;
 
 global com.plugtree.dm.dmdemo.Employee hrvp;
 global com.plugtree.dm.dmdemo.CompensationDepartment payrollDepartment;
@@ -235,4 +237,294 @@ ruleflow-group "select-approvers"
 	then
         logger.debug("Hello " + $r.employee + ". New requests for Sports Leaves must be approved by the following Compensation Departments: Vacation");
         $r.addCompensationDepartment(vacationDepartment);
+end
+
+rule "Annual leave (without salary) with total days of sick leave is more than 30 days"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.NEW, 
+					totalAbsenceDaysUntilNow > 30, approvals.size() > 0, 
+					$approvals: approvals,
+					leaveType == LeaveType.ANNUAL,
+					requestPayment == false
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+		}
+end
+
+rule "Compasionate leave with total days of sick leave is more than 30 days"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.NEW, 
+					totalAbsenceDaysUntilNow > 30, approvals.size() > 0, 
+					$approvals: approvals,
+					leaveType == LeaveType.COMPASIONATE,
+					requestPayment == true
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+		}
+end
+
+rule "Paternity leave with total days of sick leave is more than 30 days"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.NEW, 
+					totalAbsenceDaysUntilNow > 30, approvals.size() > 0, 
+					$approvals: approvals,
+					leaveType == LeaveType.PATERNITY,
+					requestPayment == true
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+		}
+end
+
+rule "Marriage leave with total days of sick leave is more than 30 days"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.NEW, 
+					totalAbsenceDaysUntilNow > 30, approvals.size() > 0, 
+					$approvals: approvals,
+					leaveType == LeaveType.MARRIAGE,
+					requestPayment == true
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+		}
+end
+
+/*rule "Sports leave with total days of sick leave is more than 30 days"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.NEW, 
+					totalAbsenceDaysUntilNow > 30, approvals.size() > 0, 
+					$approvals: approvals,
+					leaveType == LeaveType.SPORTS
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+		}
+end*/
+
+rule "Exam leave with total days of sick leave is more than 30 days"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.NEW, 
+					totalAbsenceDaysUntilNow > 30, approvals.size() > 0, 
+					$approvals: approvals,
+					leaveType == LeaveType.EXAM,
+					requestPayment == true
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+		}
+end
+
+rule "Transfer leave with total days of sick leave is more than 30 days"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.NEW, 
+					totalAbsenceDaysUntilNow > 30, approvals.size() > 0, 
+					$approvals: approvals,
+					leaveType == LeaveType.TRANSFER,
+					requestPayment == true
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+		}
+end
+
+rule "Annual leave with total days of sick leave is more than 30 days"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.NEW, 
+					totalAbsenceDaysUntilNow > 30, approvals.size() > 0, 
+					$approvals: approvals,
+					leaveType == LeaveType.ANNUAL,
+					requestPayment == true
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			kcontext.getKieRuntime().startProcess("DMDemo.vac02", params);
+		}
+end
+
+rule "Education leave (without salary) with total days of sick leave is more than 30 days"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.NEW, 
+					totalAbsenceDaysUntilNow > 30, approvals.size() > 0, 
+					$approvals: approvals,
+					leaveType == LeaveType.EDUCATION,
+					requestPayment == false
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			kcontext.getKieRuntime().startProcess("DMDemo.vac02", params);
+		}
+end
+
+rule "Exceptional leave with total days of sick leave is more than 30 days"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.NEW, 
+					totalAbsenceDaysUntilNow > 30, approvals.size() > 0, 
+					$approvals: approvals,
+					leaveType == LeaveType.EXCEPTIONAL
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			kcontext.getKieRuntime().startProcess("DMDemo.vac02", params);
+		}
+end
+
+rule "Annual leave (without salary) with total days of sick leave is less or equal than 30 days"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.NEW, 
+					totalAbsenceDaysUntilNow <= 30, approvals.size() > 0, 
+					$approvals: approvals,
+					leaveType == LeaveType.ANNUAL,
+					requestPayment == false
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			kcontext.getKieRuntime().startProcess("DMDemo.vac03", params);
+		}
+end
+
+rule "Annual leave (with salary) with total days of sick leave is less or equal than 30 days"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.NEW, 
+					totalAbsenceDaysUntilNow <= 30, approvals.size() > 0, 
+					$approvals: approvals,
+					leaveType == LeaveType.ANNUAL,
+					requestPayment == true
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			kcontext.getKieRuntime().startProcess("DMDemo.vac04", params);
+		}
+end
+
+rule "Update Annual leave (with salary)"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.MODIFY, 
+					approvals.size() > 0, $approvals: approvals,
+					leaveType == LeaveType.ANNUAL,
+					requestPayment == true
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			kcontext.getKieRuntime().startProcess("DMDemo.vac05", params);
+		}
+end
+
+rule "Cancel Annual leave (with salary)"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.CANCEL, 
+					approvals.size() > 0, $approvals: approvals,
+					leaveType == LeaveType.ANNUAL,
+					requestPayment == false
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			kcontext.getKieRuntime().startProcess("DMDemo.vac06", params);
+		}
 end
