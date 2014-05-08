@@ -16,7 +16,7 @@ public class ReconcileWithVacationBalanceHandler implements WorkItemHandler {
         results.put("vacationBalance", vacationBalance);
         logger.debug("== Execute: Reconcile With Vacation Balance Handler ======== vacationBalance:" + vacationBalance);
         manager.completeWorkItem(workItem.getId(), results);*/
-        logger.info("= Execute: Reconcile With Vacation Balance Handler = ");
+        logger.debug("= Execute: Reconcile With Vacation Balance Handler = ");
         manager.completeWorkItem(workItem.getId(), null);
     }
 
