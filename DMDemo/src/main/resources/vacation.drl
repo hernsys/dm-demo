@@ -256,7 +256,10 @@ ruleflow-group "select-approvers"
 			params.put("reviewAndApprove", approval.getType());
 			params.put("approvalType", approval.getType());
 			params.put("vacationBalance", Boolean.TRUE);
-			kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor");//TODO
+			proc.getVariable("approvedByVacationService");//TODO
 		}
 end
 
@@ -277,7 +280,10 @@ ruleflow-group "select-approvers"
 			params.put("reviewAndApprove", approval.getType());
 			params.put("approvalType", approval.getType());
 			params.put("vacationBalance", Boolean.TRUE);
-			kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
 		}
 end
 
@@ -298,7 +304,10 @@ ruleflow-group "select-approvers"
 			params.put("reviewAndApprove", approval.getType());
 			params.put("approvalType", approval.getType());
 			params.put("vacationBalance", Boolean.TRUE);
-			kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
 		}
 end
 
@@ -319,7 +328,10 @@ ruleflow-group "select-approvers"
 			params.put("reviewAndApprove", approval.getType());
 			params.put("approvalType", approval.getType());
 			params.put("vacationBalance", Boolean.TRUE);
-			kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
 		}
 end
 
@@ -339,7 +351,10 @@ ruleflow-group "select-approvers"
 			params.put("reviewAndApprove", approval.getType());
 			params.put("approvalType", approval.getType());
 			params.put("vacationBalance", Boolean.TRUE);
-			kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
 		}
 end*/
 
@@ -360,7 +375,10 @@ ruleflow-group "select-approvers"
 			params.put("reviewAndApprove", approval.getType());
 			params.put("approvalType", approval.getType());
 			params.put("vacationBalance", Boolean.TRUE);
-			kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
 		}
 end
 
@@ -381,7 +399,10 @@ ruleflow-group "select-approvers"
 			params.put("reviewAndApprove", approval.getType());
 			params.put("approvalType", approval.getType());
 			params.put("vacationBalance", Boolean.TRUE);
-			kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac01", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
 		}
 end
 
@@ -402,7 +423,11 @@ ruleflow-group "select-approvers"
 			params.put("reviewAndApprove", approval.getType());
 			params.put("approvalType", approval.getType());
 			params.put("vacationBalance", Boolean.TRUE);
-			kcontext.getKieRuntime().startProcess("DMDemo.vac02", params);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac02", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
+			proc.getVariable("outputPayrollService");//TODO
 		}
 end
 
@@ -423,7 +448,11 @@ ruleflow-group "select-approvers"
 			params.put("reviewAndApprove", approval.getType());
 			params.put("approvalType", approval.getType());
 			params.put("vacationBalance", Boolean.TRUE);
-			kcontext.getKieRuntime().startProcess("DMDemo.vac02", params);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac02", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
+			proc.getVariable("outputPayrollService");//TODO
 		}
 end
 
@@ -443,7 +472,11 @@ ruleflow-group "select-approvers"
 			params.put("reviewAndApprove", approval.getType());
 			params.put("approvalType", approval.getType());
 			params.put("vacationBalance", Boolean.TRUE);
-			kcontext.getKieRuntime().startProcess("DMDemo.vac02", params);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac02", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
+			proc.getVariable("outputPayrollService");//TODO
 		}
 end
 
@@ -464,7 +497,11 @@ ruleflow-group "select-approvers"
 			params.put("reviewAndApprove", approval.getType());
 			params.put("approvalType", approval.getType());
 			params.put("vacationBalance", Boolean.TRUE);
-			kcontext.getKieRuntime().startProcess("DMDemo.vac03", params);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac03", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
+			proc.getVariable("outputTicketService");//TODO
 		}
 end
 
@@ -485,11 +522,16 @@ ruleflow-group "select-approvers"
 			params.put("reviewAndApprove", approval.getType());
 			params.put("approvalType", approval.getType());
 			params.put("vacationBalance", Boolean.TRUE);
-			kcontext.getKieRuntime().startProcess("DMDemo.vac04", params);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac04", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
+			proc.getVariable("outputPayrollService");//TODO
+			proc.getVariable("outputTicketService");//TODO
 		}
 end
 
-rule "Update Annual leave (with salary)"
+rule "Modify Annual leave (with salary)"
 ruleflow-group "select-approvers"
 	when
 			$r:LeaveRequest(
@@ -505,11 +547,65 @@ ruleflow-group "select-approvers"
 			params.put("reviewAndApprove", approval.getType());
 			params.put("approvalType", approval.getType());
 			params.put("vacationBalance", Boolean.TRUE);
-			kcontext.getKieRuntime().startProcess("DMDemo.vac05", params);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac05", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
+			proc.getVariable("outputPayrollService");//TODO
+			proc.getVariable("outputTicketService");//TODO
 		}
 end
 
 rule "Cancel Annual leave (with salary)"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.CANCEL, 
+					approvals.size() > 0, $approvals: approvals,
+					leaveType == LeaveType.ANNUAL,
+					requestPayment == true
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac05", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
+			proc.getVariable("outputPayrollService");//TODO
+			proc.getVariable("outputTicketService");//TODO
+		}
+end
+
+rule "Modify Annual leave (without salary)"
+ruleflow-group "select-approvers"
+	when
+			$r:LeaveRequest(
+					status == Status.OPEN, type == Type.MODIFY, 
+					approvals.size() > 0, $approvals: approvals,
+					leaveType == LeaveType.ANNUAL,
+					requestPayment == false
+			) 
+	then
+		for (int index = 0; index < $approvals.size(); index++) {
+			LeaveApproval approval = $approvals.get(index);
+			Map params = new HashMap();
+			params.put("reviewAndApprove", approval.getType());
+			params.put("approvalType", approval.getType());
+			params.put("vacationBalance", Boolean.TRUE);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac06", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
+			proc.getVariable("outputTicketService");//TODO
+		}
+end
+
+rule "Cancel Annual leave (without salary)"
 ruleflow-group "select-approvers"
 	when
 			$r:LeaveRequest(
@@ -525,6 +621,10 @@ ruleflow-group "select-approvers"
 			params.put("reviewAndApprove", approval.getType());
 			params.put("approvalType", approval.getType());
 			params.put("vacationBalance", Boolean.TRUE);
-			kcontext.getKieRuntime().startProcess("DMDemo.vac06", params);
+			Object obj = kcontext.getKieRuntime().startProcess("DMDemo.vac06", params);
+			WorkflowProcessInstanceImpl proc = (WorkflowProcessInstanceImpl) obj;
+			proc.getVariable("approvedBySupervisor"); //TODO
+			proc.getVariable("approvedByVacationService");//TODO
+			proc.getVariable("outputTicketService");//TODO
 		}
 end
