@@ -1,0 +1,22 @@
+DM-DEMO - SERVICES
+
+1) We need to run this application with jetty
+	* mvn jetty:run -Djetty.port=8081	
+	
+2) All the end points can be see in the next url (WSDL - WADL)
+	* http://localhost:8081/dmdemo-webapp/services
+	
+	* WSDL: you should see (example WSDL service):
+		Available SOAP services:
+			SoaService
+			    getNameById
+				Endpoint address: http://localhost:8081/dmdemo-webapp/services/projectSoa
+				WSDL : {http://servicesImpl.dm.plugtree.com/}ExampleService
+				Target namespace: http://servicesImpl.dm.plugtree.com/
+			
+	* REST: you should see (example REST service):
+		Available RESTful services:
+			Endpoint address: http://localhost:8081/dmdemo-webapp/services/projectRest
+			WADL : http://localhost:8081/dmdemo-webapp/services/projectRest?_wadl
+	
+	
