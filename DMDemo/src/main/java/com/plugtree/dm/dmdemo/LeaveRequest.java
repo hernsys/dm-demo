@@ -48,6 +48,7 @@ public class LeaveRequest implements Serializable {
 	private String institute;
 	private String relation;
 	private boolean insideCountry = true;
+	private int transferDistanceKm = 0;
 	
 	public LeaveRequest() {
 
@@ -69,6 +70,15 @@ public class LeaveRequest implements Serializable {
 		this.institute = other.institute;
 		this.relation = other.relation;
 		this.insideCountry = other.insideCountry;
+		this.transferDistanceKm = other.transferDistanceKm;
+	}
+	
+	public void setTransferDistanceKm(int transferDistanceKm) {
+		this.transferDistanceKm = transferDistanceKm;
+	}
+	
+	public int getTransferDistanceKm() {
+		return transferDistanceKm;
 	}
 	
 	public LeaveRequest(Builder builder) {
@@ -87,6 +97,7 @@ public class LeaveRequest implements Serializable {
 		this.institute = builder.institute;
 		this.relation = builder.compasionateRelation;
 		this.insideCountry = builder.insideCountry;
+		this.transferDistanceKm = builder.transferDistanceKm;
 	}
 	
 	public void setInstitute(String institute) {
@@ -326,6 +337,7 @@ public class LeaveRequest implements Serializable {
 		private String institute;
 		private String compasionateRelation;
 		private Boolean insideCountry = Boolean.TRUE;
+		private int transferDistanceKm = 0;
 
 		public Builder(Employee employee, LeaveType leaveType,
 				Boolean requestPayment) {
@@ -395,6 +407,11 @@ public class LeaveRequest implements Serializable {
 
 		public Builder type(Type type) {
 			this.type = type;
+			return this;
+		}
+		
+		public Builder transferDistanceKm(int transferDistanceKm) {
+			this.transferDistanceKm = transferDistanceKm;
 			return this;
 		}
 	}

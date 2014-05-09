@@ -705,11 +705,11 @@ ruleflow-group "select-approvers"
 		)
 	then
 		//Add require approval of GM
-		$lr.addApprover($lr.getEmployee().getGeneralManager());
+		$lr.addApprover($lr.getEmployee().getSupervisor(Role.GENERAL_MANAGER));
 		update($lr);
 end
 
-rule "HR Vacation Policy: Exceptional Leave with GM approval"
+rule "HR Vacation Policy: Exceptional Leave requires GM approval"
 ruleflow-group "select-approvers"
 //RelatedTo("BR-05")
 	when
@@ -720,7 +720,7 @@ ruleflow-group "select-approvers"
 		)
 	then
 		//Add require approval of GM
-		$lr.addApprover($lr.getEmployee().getGeneralManager());
+		$lr.addApprover($lr.getEmployee().getSupervisor(Role.GENERAL_MANAGER));
 		update($lr);
 end
 
@@ -739,73 +739,47 @@ ruleflow-group "select-approvers"
 		update($lr);
 end
 
-
-
-
-
-
-
-
-
-
-/* TODO
-
-rule "HR Vacation Policy: Exceptional Leave with GM approval over 2 months"
-ruleflow-group "select-approvers"
-//RelatedTo("BR-05")
-	when
-		
-	then
-		//Add require approval of VP
-end
-
 rule "HR Vacation Policy: Exceptional Leave with VP approval over 6 months on the last 3 years"
 ruleflow-group "select-approvers"
 //RelatedTo("BR-05")
 	when
-		
+		$lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.EXCEPTIONAL
+		)
+		eval (employeeService.getUsedDays($lr.getEmployee(), LeaveType.EXCEPTIONAL, 1095, TimeUnit.DAYS) > 180)
 	then
-		//Add require approval of GM
-end
-
-rule "HR Vacation Policy: Exceptional Leave requires GM approval"
-ruleflow-group "select-approvers"
-//RelatedTo("BR-05")
-	when
-		
-	then
-		//Add require approval of GM
+		//Add require approval of VP
+        $lr.addApprover(vp);
+        update($lr);
 end
 
 rule "HR Vacation Policy: Transfer Leave under 100 km"
-ruleflow-group "select-approvers"
-//RelatedTo("BR-05")
+ruleflow-group "validate inputs"
 	when
-		
+	    $lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.TRANSFER,
+			transferDistanceKm < 100
+		)
 	then
 		//Reject
+		messages.add(newErrorMessage("Transfer leave not available for under 100 km"));
 end
 
 rule "HR Vacation Policy: Transfer Leave over 100 km over 2 days"
-ruleflow-group "select-approvers"
-//RelatedTo("BR-05")
+ruleflow-group "validate inputs"
 	when
-		
+	    $lr: LeaveRequest(type == Type.NEW,
+			status == Status.OPEN,
+			leaveType == LeaveType.TRANSFER,
+			transferDistanceKm >= 100,
+			leaveLength > 2
+		)
 	then
 		//Reject
+		messages.add(newErrorMessage("Transfer leave not available for over 2 days"));
 end
-*/
-
-
-
-
-
-
-
-
-
-
-
 
 rule "Annual leave (without salary) with total days of sick leave is more than 30 days"
 ruleflow-group "select-approvers"

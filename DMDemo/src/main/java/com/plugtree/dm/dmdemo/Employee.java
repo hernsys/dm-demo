@@ -17,7 +17,6 @@ public class Employee implements Serializable {
 	private String position;
 	private Role role;
 	private Employee directSupervisor;
-	private Employee generalManager;
 	private List<Employee> reports;
 	private Integer level = 1;
 
@@ -38,7 +37,6 @@ public class Employee implements Serializable {
 		this.reports = builder.reports;
 		this.salaryPercent = builder.salaryPercent;
 		this.level = builder.level;
-		this.generalManager = builder.generalManager;
 	}
 
 	
@@ -133,14 +131,6 @@ public class Employee implements Serializable {
 		return directSupervisor;
 	}
 	
-	public void setGeneralManager(Employee generalManager) {
-		this.generalManager = generalManager;
-	}
-	
-	public Employee getGeneralManager() {
-		return generalManager;
-	}
-	
 	public void setSalaryPercent(Double salaryPercent) {
 		this.salaryPercent = salaryPercent;
 	}
@@ -182,7 +172,6 @@ public class Employee implements Serializable {
 		private List<Employee> reports;
 		private Double salaryPercent;
 		private Integer level;
-		private Employee generalManager;
 
 		public Builder(Integer id, String name) {
 			this.id = id;
@@ -235,11 +224,6 @@ public class Employee implements Serializable {
 
 		public Builder directSupervisor(Employee directSupervisor) {
 			this.directSupervisor = directSupervisor;
-			return this;
-		}
-
-		public Builder generalManager(Employee generalManager) {
-			this.generalManager = generalManager;
 			return this;
 		}
 
