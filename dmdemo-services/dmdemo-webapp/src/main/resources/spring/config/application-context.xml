@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cxf="http://cxf.apache.org/core"
+	xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd
+http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<description>Context - WebServices definition</description>
+
+	<!-- Load CXF modules from cxf.jar -->
+	<import resource="classpath:spring/config/com.plugtree.cxf.config.xml" />
+
+	<!-- Import config files for WebServices, DAO, Spring config, etc -->
+	<import resource="classpath:spring/config/com.plugtree.spring.services.xml" />
+
+</beans>
