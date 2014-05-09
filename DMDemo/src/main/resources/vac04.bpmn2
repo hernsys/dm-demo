@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.omg.org/bpmn20" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:bpsim="http://www.bpsim.org/schemas/1.0" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:drools="http://www.jboss.org/drools" id="_UpUKYNZvEeOnTO9LPFjnVw" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd http://www.jboss.org/drools drools.xsd http://www.bpsim.org/schemas/1.0 bpsim.xsd" expressionLanguage="http://www.mvel.org/2.0" targetNamespace="http://www.omg.org/bpmn20" typeLanguage="http://www.java.com/javaTypes">
   <bpmn2:itemDefinition id="_vacationBalanceItem" structureRef="Boolean"/>
-  <bpmn2:itemDefinition id="_reviewAndApproveItem" structureRef="com.plugtree.dm.dmdemo.ApprovalType"/>
-  <bpmn2:itemDefinition id="_approvalTypeItem" structureRef="com.plugtree.dm.dmdemo.ApprovalType"/>
+  <bpmn2:itemDefinition id="_reviewAndApproveItem" structureRef="com.plugtree.dm.entities.ApprovalType"/>
+  <bpmn2:itemDefinition id="_approvalTypeItem" structureRef="com.plugtree.dm.entities.ApprovalType"/>
   <bpmn2:itemDefinition id="__CBBE92F4-35F9-4079-8E8A-120D3C075613_param1InputItem" structureRef="String"/>
   <bpmn2:itemDefinition id="__CBBE92F4-35F9-4079-8E8A-120D3C075613_param2InputItem" structureRef="String"/>
   <bpmn2:itemDefinition id="__CBBE92F4-35F9-4079-8E8A-120D3C075613_ResultOutputItem" structureRef="java.util.Map"/>
@@ -168,7 +168,7 @@
     </bpmn2:exclusiveGateway>
     <bpmn2:sequenceFlow id="_CAC7A765-5722-4775-AB87-E4A4070C4026" drools:bgcolor="#000000" drools:selectable="true" drools:priority="1" sourceRef="_ED443090-C12E-47A6-BB69-420182801E4D" targetRef="_1AC87ABD-8BF4-4402-AEBD-5B05FCD05835"/>
     <bpmn2:sequenceFlow id="_340E3C37-5D4B-4157-88A6-84E4461549A1" drools:bgcolor="#000000" drools:selectable="true" drools:priority="1" name="approved" sourceRef="_1AC87ABD-8BF4-4402-AEBD-5B05FCD05835" targetRef="_8A7793C0-26F6-4639-B9C2-6C67F002BCEB">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_UpUKf9ZvEeOnTO9LPFjnVw" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(com.plugtree.dm.dmdemo.ApprovalType.APPROVED.equals(reviewAndApprove));]]></bpmn2:conditionExpression>
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_UpUKf9ZvEeOnTO9LPFjnVw" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(com.plugtree.dm.entities.ApprovalType.APPROVED.equals(reviewAndApprove));]]></bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:exclusiveGateway id="_01609641-F306-48B2-B415-A9336ED9AB07" drools:bgcolor="#f0e68c" drools:selectable="true" drools:bordercolor="#a67f00" drools:dg="" name="" gatewayDirection="Diverging">
       <bpmn2:incoming>_E66759CA-3BBD-4DE6-BD30-0B65C71A69E1</bpmn2:incoming>
@@ -179,10 +179,10 @@
     </bpmn2:exclusiveGateway>
     <bpmn2:sequenceFlow id="_E66759CA-3BBD-4DE6-BD30-0B65C71A69E1" drools:bgcolor="#000000" drools:selectable="true" drools:priority="1" sourceRef="_8A7793C0-26F6-4639-B9C2-6C67F002BCEB" targetRef="_01609641-F306-48B2-B415-A9336ED9AB07"/>
     <bpmn2:sequenceFlow id="_D021C3F2-06DD-4812-A2A1-98B872110082" drools:bgcolor="#000000" drools:selectable="true" drools:priority="1" name="return to requester" sourceRef="_01609641-F306-48B2-B415-A9336ED9AB07" targetRef="_CEF23686-70B3-4BD8-B59C-467145B96AE3">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_UpUKgNZvEeOnTO9LPFjnVw" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(com.plugtree.dm.dmdemo.ApprovalType.ROLLBACK_REQUESTOR.equals(approvalType));]]></bpmn2:conditionExpression>
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_UpUKgNZvEeOnTO9LPFjnVw" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(com.plugtree.dm.entities.ApprovalType.ROLLBACK_REQUESTOR.equals(approvalType));]]></bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="_E38ACC20-C055-4035-B207-C9C6F311E958" drools:bgcolor="#000000" drools:selectable="true" drools:priority="1" name="return to direct manager" sourceRef="_01609641-F306-48B2-B415-A9336ED9AB07" targetRef="_7D6821F8-3142-4541-8587-010E18F25E87">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_UpUKgdZvEeOnTO9LPFjnVw" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(com.plugtree.dm.dmdemo.ApprovalType.ROLLBACK_MANAGER.equals(approvalType));]]></bpmn2:conditionExpression>
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_UpUKgdZvEeOnTO9LPFjnVw" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(com.plugtree.dm.entities.ApprovalType.ROLLBACK_MANAGER.equals(approvalType));]]></bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:task id="_B5BBC87B-C232-4B8A-9A93-0482BAC29F7C" drools:selectable="true" drools:taskName="VP-3.2.4-VAC-05" name="Approval Notification">
       <bpmn2:incoming>_83C88402-59AF-47D4-B7C0-D685694661E1</bpmn2:incoming>
@@ -240,11 +240,11 @@
       <bpmn2:outgoing>_98B35947-8620-484A-89E7-FB54E50755D5</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
     <bpmn2:sequenceFlow id="_E59D974F-2A9C-4557-9A1B-75028B24723B" drools:bgcolor="#000000" drools:selectable="true" drools:priority="1" name="rejected" sourceRef="_01609641-F306-48B2-B415-A9336ED9AB07" targetRef="_2522DF15-BF11-4A4F-A7C3-D79B1A8E5823">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_UpUKkNZvEeOnTO9LPFjnVw" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(com.plugtree.dm.dmdemo.ApprovalType.REJECTED.equals(approvalType));]]></bpmn2:conditionExpression>
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_UpUKkNZvEeOnTO9LPFjnVw" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(com.plugtree.dm.entities.ApprovalType.REJECTED.equals(approvalType));]]></bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="_98B35947-8620-484A-89E7-FB54E50755D5" drools:bgcolor="#000000" drools:selectable="true" drools:priority="1" sourceRef="_2522DF15-BF11-4A4F-A7C3-D79B1A8E5823" targetRef="_2704DA95-600D-477E-AAD1-3FB09197B885"/>
     <bpmn2:sequenceFlow id="_028DDD10-584A-45A0-8B08-254CABC3D302" drools:bgcolor="#000000" drools:selectable="true" drools:priority="1" name="rejected" sourceRef="_1AC87ABD-8BF4-4402-AEBD-5B05FCD05835" targetRef="_2522DF15-BF11-4A4F-A7C3-D79B1A8E5823">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_UpUKkdZvEeOnTO9LPFjnVw" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(com.plugtree.dm.dmdemo.ApprovalType.REJECTED.equals(reviewAndApprove));]]></bpmn2:conditionExpression>
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_UpUKkdZvEeOnTO9LPFjnVw" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(com.plugtree.dm.entities.ApprovalType.REJECTED.equals(reviewAndApprove));]]></bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:exclusiveGateway id="_CEB6827D-FFDF-4BF3-8698-1A68667098C0" drools:bgcolor="#f0e68c" drools:selectable="true" drools:bordercolor="#a67f00" drools:dg="" name="" gatewayDirection="Converging">
       <bpmn2:incoming>_BC78B7D2-0F51-4696-ABB2-D83C3701BB7E</bpmn2:incoming>
@@ -296,7 +296,7 @@
     </bpmn2:task>
     <bpmn2:sequenceFlow id="_D7278E97-8995-4E9B-B6B5-790F27E706BE" drools:bgcolor="#000000" drools:selectable="true" drools:priority="1" sourceRef="_8B44441F-6723-47A9-A212-FF6A0454784E" targetRef="_8F48C04E-8FC9-486B-9741-3163AE044DB7"/>
     <bpmn2:sequenceFlow id="_CF2360A1-8756-4325-9EAF-86ECE2E48DBB" drools:bgcolor="#000000" drools:selectable="true" drools:priority="1" name="approved" sourceRef="_01609641-F306-48B2-B415-A9336ED9AB07" targetRef="_8B44441F-6723-47A9-A212-FF6A0454784E">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_UpUKmdZvEeOnTO9LPFjnVw" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(com.plugtree.dm.dmdemo.ApprovalType.APPROVED.equals(approvalType));]]></bpmn2:conditionExpression>
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_UpUKmdZvEeOnTO9LPFjnVw" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(com.plugtree.dm.entities.ApprovalType.APPROVED.equals(approvalType));]]></bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:task id="_B23DC6D0-A068-462D-809B-9FF13E3E9976" drools:selectable="true" drools:taskName="VP-3.2.4-VAC-08" name="Review and approve for the Ticket">
       <bpmn2:incoming>_F1649A37-C8D9-42F2-B149-9C9974AB9C74</bpmn2:incoming>

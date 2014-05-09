@@ -3,9 +3,9 @@
   <bpmn2:itemDefinition id="_hasTravelItem" structureRef="Boolean"/>
   <bpmn2:itemDefinition id="_requiresHRItem" structureRef="Boolean"/>
   <bpmn2:itemDefinition id="_requiresHRDirectorItem" structureRef="Boolean"/>
-  <bpmn2:itemDefinition id="_requestTypeItem" structureRef="com.plugtree.dm.dmdemo.LeaveRequest.Type"/>
-  <bpmn2:itemDefinition id="_approvalTypeItem" structureRef="com.plugtree.dm.dmdemo.ApprovalType"/>
-  <bpmn2:itemDefinition id="__ECED4545-6DE1-4FAB-BB49-47886A5388EA_approvalTypeInputItem" structureRef="com.plugtree.dm.dmdemo.ApprovalType"/>
+  <bpmn2:itemDefinition id="_requestTypeItem" structureRef="com.plugtree.dm.entities.LeaveRequest.Type"/>
+  <bpmn2:itemDefinition id="_approvalTypeItem" structureRef="com.plugtree.dm.entities.ApprovalType"/>
+  <bpmn2:itemDefinition id="__ECED4545-6DE1-4FAB-BB49-47886A5388EA_approvalTypeInputItem" structureRef="com.plugtree.dm.entities.ApprovalType"/>
   <bpmn2:itemDefinition id="__58A30308-4F82-480C-972A-8E80DEAA9211_MySecondParamInputItem" structureRef="String"/>
   <bpmn2:itemDefinition id="__58A30308-4F82-480C-972A-8E80DEAA9211_MyFirstParamInputItem" structureRef="String"/>
   <bpmn2:itemDefinition id="__58A30308-4F82-480C-972A-8E80DEAA9211_MyThirdParamInputItem" structureRef="java.lang.Object"/>
@@ -20,8 +20,8 @@
   <bpmn2:itemDefinition id="__2D02D593-21C7-4E89-AB9B-57C17EE00AFC_ResultOutputItem" structureRef="java.util.Map"/>
   <bpmn2:process id="DMDemo.HRProcess" drools:packageName="org.jbpm" drools:version="1.0" name="HRProcess" isExecutable="true">
     <bpmn2:extensionElements>
-      <drools:import name="com.plugtree.dm.dmdemo.LeaveRequest.Type"/>
-      <drools:import name="com.plugtree.dm.dmdemo.ApprovalType"/>
+      <drools:import name="com.plugtree.dm.entities.LeaveRequest.Type"/>
+      <drools:import name="com.plugtree.dm.entities.ApprovalType"/>
     </bpmn2:extensionElements>
     <bpmn2:property id="hasTravel" itemSubjectRef="_hasTravelItem"/>
     <bpmn2:property id="requiresHR" itemSubjectRef="_requiresHRItem"/>
@@ -64,7 +64,7 @@
       <bpmn2:incoming>_7F38213F-3309-4848-AF71-ED6D5FF7A765</bpmn2:incoming>
       <bpmn2:outgoing>_93BAF527-A012-450A-8F24-282D12A3E63F</bpmn2:outgoing>
       <bpmn2:ioSpecification id="_AjxxhNSYEeOBXPrAytYq-g">
-        <bpmn2:dataInput id="_ECED4545-6DE1-4FAB-BB49-47886A5388EA_approvalTypeInput" drools:dtype="com.plugtree.dm.dmdemo.ApprovalType" itemSubjectRef="__ECED4545-6DE1-4FAB-BB49-47886A5388EA_approvalTypeInputItem" name="approvalType"/>
+        <bpmn2:dataInput id="_ECED4545-6DE1-4FAB-BB49-47886A5388EA_approvalTypeInput" drools:dtype="com.plugtree.dm.entities.ApprovalType" itemSubjectRef="__ECED4545-6DE1-4FAB-BB49-47886A5388EA_approvalTypeInputItem" name="approvalType"/>
         <bpmn2:inputSet id="_AjxxhdSYEeOBXPrAytYq-g">
           <bpmn2:dataInputRefs>_ECED4545-6DE1-4FAB-BB49-47886A5388EA_approvalTypeInput</bpmn2:dataInputRefs>
         </bpmn2:inputSet>

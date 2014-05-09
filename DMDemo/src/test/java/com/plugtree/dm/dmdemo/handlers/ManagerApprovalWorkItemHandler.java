@@ -9,8 +9,8 @@ import org.kie.api.runtime.process.WorkItemManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plugtree.dm.dmdemo.ApprovalType;
-import com.plugtree.dm.dmdemo.LeaveApproval;
+import com.plugtree.dm.entities.ApprovalType;
+import com.plugtree.dm.entities.LeaveApproval;
 
 public class ManagerApprovalWorkItemHandler  implements WorkItemHandler {
 	private Logger logger = LoggerFactory.getLogger(ManagerApprovalWorkItemHandler.class);

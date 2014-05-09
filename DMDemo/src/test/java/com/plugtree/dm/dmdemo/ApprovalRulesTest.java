@@ -35,8 +35,15 @@ import org.kie.internal.runtime.manager.context.EmptyContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.plugtree.dm.dmdemo.LeaveRequest.Type;
-import com.plugtree.dm.dmdemo.service.AbsenceService;
+import com.plugtree.dm.entities.AbsenceReason;
+import com.plugtree.dm.entities.CompensationDepartment;
+import com.plugtree.dm.entities.Employee;
+import com.plugtree.dm.entities.LeaveApproval;
+import com.plugtree.dm.entities.LeaveRequest;
+import com.plugtree.dm.entities.LeaveType;
+import com.plugtree.dm.entities.Role;
+import com.plugtree.dm.entities.LeaveRequest.Type;
+import com.plugtree.dm.servicesImpl.AbsenceService;
 
 /**
  * Test Cases for the Approval Rules

@@ -28,6 +28,8 @@ import com.plugtree.dm.dmdemo.handlers.ModifyVacationHandler;
 import com.plugtree.dm.dmdemo.handlers.RollbackFormToDirectManagerHandler;
 import com.plugtree.dm.dmdemo.handlers.RollbackFormToRequestorHandler;
 import com.plugtree.dm.dmdemo.handlers.TravelHandler;
+import com.plugtree.dm.entities.ApprovalType;
+import com.plugtree.dm.entities.LeaveRequest;
 import com.plugtree.dm.proj.TestAsyncWorkItemHandler;
 import com.plugtree.util.KieTestHelper;
 

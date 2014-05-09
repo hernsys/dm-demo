@@ -23,6 +23,8 @@ import com.plugtree.dm.dmdemo.handlers.HRDirectorHandler;
 import com.plugtree.dm.dmdemo.handlers.HumanResourcesHandler;
 import com.plugtree.dm.dmdemo.handlers.RollbackFormToDirectManagerHandler;
 import com.plugtree.dm.dmdemo.handlers.TravelHandler;
+import com.plugtree.dm.entities.ApprovalType;
+import com.plugtree.dm.entities.LeaveRequest;
 import com.plugtree.util.KieTestHelper;
 
 /**

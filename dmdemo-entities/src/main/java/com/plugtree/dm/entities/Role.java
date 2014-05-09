@@ -1,0 +1,5 @@
+package com.plugtree.dm.entities;
+
+public enum Role {
+	PRESIDENT, EXECUTIVE, VICE_PRESIDENT, GENERAL_MANAGER, DIRECTOR, SECTION_MANAGER, OPERATOR;
+}

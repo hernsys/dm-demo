@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.omg.org/bpmn20" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:bpsim="http://www.bpsim.org/schemas/1.0" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:drools="http://www.jboss.org/drools" id="_e_NY4dX7EeOCKNxV-uYObA" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd http://www.jboss.org/drools drools.xsd http://www.bpsim.org/schemas/1.0 bpsim.xsd" expressionLanguage="http://www.mvel.org/2.0" targetNamespace="http://www.omg.org/bpmn20" typeLanguage="http://www.java.com/javaTypes">
   <bpmn2:itemDefinition id="_validInputsItem" structureRef="Boolean"/>
-  <bpmn2:itemDefinition id="_approvalTypeItem" structureRef="com.plugtree.dm.dmdemo.ApprovalType"/>
-  <bpmn2:itemDefinition id="_leaveRequestItem" structureRef="com.plugtree.dm.dmdemo.LeaveRequest"/>
-  <bpmn2:itemDefinition id="_requestTypeItem" structureRef="com.plugtree.dm.dmdemo.LeaveRequest.Type"/>
+  <bpmn2:itemDefinition id="_approvalTypeItem" structureRef="com.plugtree.dm.entities.ApprovalType"/>
+  <bpmn2:itemDefinition id="_leaveRequestItem" structureRef="com.plugtree.dm.entities.LeaveRequest"/>
+  <bpmn2:itemDefinition id="_requestTypeItem" structureRef="com.plugtree.dm.entities.LeaveRequest.Type"/>
   <bpmn2:itemDefinition id="_hasTravelItem" structureRef="Boolean"/>
   <bpmn2:itemDefinition id="_requiresHRDirectorItem" structureRef="Boolean"/>
   <bpmn2:itemDefinition id="_requiresHRItem" structureRef="Boolean"/>
@@ -15,7 +15,7 @@
   <bpmn2:itemDefinition id="__7E01B4B9-BD19-4D65-8B8A-42EC4A3DE90B_MyFirstParamInputItem" structureRef="String"/>
   <bpmn2:itemDefinition id="__7E01B4B9-BD19-4D65-8B8A-42EC4A3DE90B_MyThirdParamInputItem" structureRef="java.lang.Object"/>
   <bpmn2:itemDefinition id="__7E01B4B9-BD19-4D65-8B8A-42EC4A3DE90B_ResultOutputItem" structureRef="java.util.Map"/>
-  <bpmn2:itemDefinition id="__C819948D-D3AD-484E-A04D-A47B56A6DF7F_approvalTypeInputItem" structureRef="com.plugtree.dm.dmdemo.ApprovalType"/>
+  <bpmn2:itemDefinition id="__C819948D-D3AD-484E-A04D-A47B56A6DF7F_approvalTypeInputItem" structureRef="com.plugtree.dm.entities.ApprovalType"/>
   <bpmn2:itemDefinition id="__C819948D-D3AD-484E-A04D-A47B56A6DF7F_requiresHRInputItem" structureRef="Boolean"/>
   <bpmn2:itemDefinition id="__C819948D-D3AD-484E-A04D-A47B56A6DF7F_requiresHRDirectorInputItem" structureRef="Boolean"/>
   <bpmn2:itemDefinition id="__E8441BDB-8930-47ED-8AEF-10E22C92CD57_MyThirdParamInputItem" structureRef="java.lang.Object"/>
@@ -24,8 +24,8 @@
   <bpmn2:itemDefinition id="__E8441BDB-8930-47ED-8AEF-10E22C92CD57_ResultOutputItem" structureRef="java.util.Map"/>
   <bpmn2:process id="DMDemo.VacationProcess" drools:packageName="org.jbpm" drools:version="1.0" name="VacationProcess" isExecutable="true">
     <bpmn2:extensionElements>
-      <drools:import name="com.plugtree.dm.dmdemo.Employee"/>
-      <drools:import name="com.plugtree.dm.dmdemo.ApprovalType"/>
+      <drools:import name="com.plugtree.dm.entities.Employee"/>
+      <drools:import name="com.plugtree.dm.entities.ApprovalType"/>
     </bpmn2:extensionElements>
     <bpmn2:property id="validInputs" itemSubjectRef="_validInputsItem"/>
     <bpmn2:property id="approvalType" itemSubjectRef="_approvalTypeItem"/>
@@ -214,13 +214,13 @@
       <bpmn2:scriptTask id="_59865F52-1ADC-46CC-AC44-7843C5C9B2C0" drools:selectable="true" name="Consolidate approval" scriptFormat="http://www.java.com/java">
         <bpmn2:incoming>_58F8CD6D-CCCE-48C3-9E7C-EF4A18B118B1</bpmn2:incoming>
         <bpmn2:outgoing>_3D2E9929-9065-4259-9087-157C75C8DA85</bpmn2:outgoing>
-        <bpmn2:script><![CDATA[com.plugtree.dm.dmdemo.LeaveApproval currentApproval = (com.plugtree.dm.dmdemo.LeaveApproval) approval;
+        <bpmn2:script><![CDATA[com.plugtree.dm.entities.LeaveApproval currentApproval = (com.plugtree.dm.entities.LeaveApproval) approval;
 
 System.out.println(">> Updating LeaveApproval to Type: " + currentApproval.getType());
 
 // Search for this approval in the Request and update it,
 // since we are working with a copy of the real object
-for (com.plugtree.dm.dmdemo.LeaveApproval a : leaveRequest.getApprovals()) {
+for (com.plugtree.dm.entities.LeaveApproval a : leaveRequest.getApprovals()) {
 	if (currentApproval.getId()== a.getId()) {
 		a.setType(currentApproval.getType());
 	}
@@ -228,14 +228,14 @@ for (com.plugtree.dm.dmdemo.LeaveApproval a : leaveRequest.getApprovals()) {
       </bpmn2:scriptTask>
       <bpmn2:sequenceFlow id="_DC4ACCBF-3E61-4ABD-937D-4647FCAEAD45" drools:bgcolor="#000000" drools:selectable="true" sourceRef="_5C5B9C7B-B57F-44EC-A731-1614F348ABF9" targetRef="_E5DC1A3A-5C98-49E3-8AF5-A21B2D209832"/>
       <bpmn2:sequenceFlow id="_474642DC-8F03-493C-9F99-65B067DE2B55" drools:bgcolor="#000000" drools:selectable="true" name="Requires review" sourceRef="_BC050D6E-4187-4B6B-85D9-73D77218A2A1" targetRef="_D840CC0E-29BE-4F59-9FEF-927A1B7DEDE6">
-        <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_fIXU8tX7EeOCKNxV-uYObA" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(ApprovalType.REVIEW_REQUIRED.equals(((com.plugtree.dm.dmdemo.LeaveApproval)approval).getType()));]]></bpmn2:conditionExpression>
+        <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_fIXU8tX7EeOCKNxV-uYObA" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(ApprovalType.REVIEW_REQUIRED.equals(((com.plugtree.dm.entities.LeaveApproval)approval).getType()));]]></bpmn2:conditionExpression>
       </bpmn2:sequenceFlow>
       <bpmn2:sequenceFlow id="_91565D92-0E45-4099-A671-6037BC48BF76" drools:bgcolor="#000000" drools:selectable="true" sourceRef="_D840CC0E-29BE-4F59-9FEF-927A1B7DEDE6" targetRef="_E5DC1A3A-5C98-49E3-8AF5-A21B2D209832"/>
       <bpmn2:sequenceFlow id="_58F8CD6D-CCCE-48C3-9E7C-EF4A18B118B1" drools:bgcolor="#000000" drools:selectable="true" name="Approved" sourceRef="_BC050D6E-4187-4B6B-85D9-73D77218A2A1" targetRef="_59865F52-1ADC-46CC-AC44-7843C5C9B2C0">
         <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_fIXU89X7EeOCKNxV-uYObA" language="http://www.java.com/java"><![CDATA[return true;]]></bpmn2:conditionExpression>
       </bpmn2:sequenceFlow>
       <bpmn2:sequenceFlow id="_C2ABACB3-28F1-4A1E-A84F-66F236E975FC" drools:bgcolor="#000000" drools:selectable="true" sourceRef="_BC050D6E-4187-4B6B-85D9-73D77218A2A1" targetRef="_9B8CFD42-2C9D-4DA3-960D-7DD34F7843CD">
-        <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_fIZKENX7EeOCKNxV-uYObA" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(ApprovalType.REJECTED.equals(((com.plugtree.dm.dmdemo.LeaveApproval) approval).getType()));]]></bpmn2:conditionExpression>
+        <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_fIZKENX7EeOCKNxV-uYObA" language="http://www.java.com/java"><![CDATA[return KieFunctions.isTrue(ApprovalType.REJECTED.equals(((com.plugtree.dm.entities.LeaveApproval) approval).getType()));]]></bpmn2:conditionExpression>
       </bpmn2:sequenceFlow>
       <bpmn2:sequenceFlow id="_6D58F3D6-1D20-4B3F-98AB-C48E849E28F0" drools:bgcolor="#000000" drools:selectable="true" sourceRef="_DA407B0B-32B8-42AB-9040-C2603179B2FA" targetRef="_BC050D6E-4187-4B6B-85D9-73D77218A2A1"/>
       <bpmn2:sequenceFlow id="_BFC6922C-76D5-4C38-82DD-2A296E29C541" drools:bgcolor="#000000" drools:selectable="true" sourceRef="_E5DC1A3A-5C98-49E3-8AF5-A21B2D209832" targetRef="_DA407B0B-32B8-42AB-9040-C2603179B2FA"/>
@@ -257,7 +257,7 @@ for (com.plugtree.dm.dmdemo.LeaveApproval a : leaveRequest.getApprovals()) {
       <bpmn2:incoming>_4F23190A-A8F0-4AF6-A3A3-5769BB33DB18</bpmn2:incoming>
       <bpmn2:outgoing>_F232741F-E6DF-46EC-A47C-9AD03BE7505A</bpmn2:outgoing>
       <bpmn2:ioSpecification id="_fIZKEdX7EeOCKNxV-uYObA">
-        <bpmn2:dataInput id="_C819948D-D3AD-484E-A04D-A47B56A6DF7F_approvalTypeInput" drools:dtype="com.plugtree.dm.dmdemo.ApprovalType" itemSubjectRef="__C819948D-D3AD-484E-A04D-A47B56A6DF7F_approvalTypeInputItem" name="approvalType"/>
+        <bpmn2:dataInput id="_C819948D-D3AD-484E-A04D-A47B56A6DF7F_approvalTypeInput" drools:dtype="com.plugtree.dm.entities.ApprovalType" itemSubjectRef="__C819948D-D3AD-484E-A04D-A47B56A6DF7F_approvalTypeInputItem" name="approvalType"/>
         <bpmn2:dataInput id="_C819948D-D3AD-484E-A04D-A47B56A6DF7F_requiresHRInput" drools:dtype="Boolean" itemSubjectRef="__C819948D-D3AD-484E-A04D-A47B56A6DF7F_requiresHRInputItem" name="requiresHR"/>
         <bpmn2:dataInput id="_C819948D-D3AD-484E-A04D-A47B56A6DF7F_requiresHRDirectorInput" drools:dtype="Boolean" itemSubjectRef="__C819948D-D3AD-484E-A04D-A47B56A6DF7F_requiresHRDirectorInputItem" name="requiresHRDirector"/>
         <bpmn2:inputSet id="_fIZKEtX7EeOCKNxV-uYObA">

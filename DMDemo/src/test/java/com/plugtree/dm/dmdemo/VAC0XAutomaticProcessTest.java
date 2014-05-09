@@ -21,6 +21,7 @@ import com.plugtree.dm.dmdemo.handlers.ReviewAndApproveForVacationHandler;
 import com.plugtree.dm.dmdemo.handlers.ReviewAndApproveHandler;
 import com.plugtree.dm.dmdemo.handlers.ReviewAndApproveSalarySubmittedHandler;
 import com.plugtree.dm.dmdemo.handlers.ReviewAndApproveThePayrollHandler;
+import com.plugtree.dm.entities.ApprovalType;
 import com.plugtree.util.KieTestHelper;
 
 public class VAC0XAutomaticProcessTest {

@@ -61,6 +61,14 @@ import com.plugtree.dm.dmdemo.handlers.NotifyUserHandler;
 import com.plugtree.dm.dmdemo.handlers.RollbackFormToDirectManagerHandler;
 import com.plugtree.dm.dmdemo.handlers.RollbackFormToRequestorHandler;
 import com.plugtree.dm.dmdemo.handlers.TravelHandler;
+import com.plugtree.dm.entities.AbsenceReason;
+import com.plugtree.dm.entities.ApprovalType;
+import com.plugtree.dm.entities.CompensationDepartment;
+import com.plugtree.dm.entities.Employee;
+import com.plugtree.dm.entities.LeaveApproval;
+import com.plugtree.dm.entities.LeaveRequest;
+import com.plugtree.dm.entities.LeaveType;
+import com.plugtree.dm.entities.Role;
 import com.plugtree.util.KieTestHelper;
 
 /**

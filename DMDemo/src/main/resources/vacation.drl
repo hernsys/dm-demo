@@ -2,6 +2,7 @@
 package com.plugtree.dm.dmdemo;
 
 import com.plugtree.dm.dmdemo.*;
+import com.plugtree.dm.entities.*;
 import org.jbpm.workflow.instance.impl.WorkflowProcessInstanceImpl;
 import function com.plugtree.dm.core.Message.*;
 import com.plugtree.dm.core.TimeUtils;
@@ -11,17 +12,17 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-global com.plugtree.dm.dmdemo.Employee hrvp;
-global com.plugtree.dm.dmdemo.Employee vp;//TODO
-global com.plugtree.dm.dmdemo.CompensationDepartment payrollDepartment;
-global com.plugtree.dm.dmdemo.CompensationDepartment travelDepartment;
-global com.plugtree.dm.dmdemo.CompensationDepartment vacationDepartment;
+global com.plugtree.dm.entities.Employee hrvp;
+global com.plugtree.dm.entities.Employee vp;//TODO
+global com.plugtree.dm.entities.CompensationDepartment payrollDepartment;
+global com.plugtree.dm.entities.CompensationDepartment travelDepartment;
+global com.plugtree.dm.entities.CompensationDepartment vacationDepartment;
 global java.util.List messages;
 global org.slf4j.Logger logger;
 
-global com.plugtree.dm.dmdemo.service.PayrollService payrollService;//TODO
-global com.plugtree.dm.dmdemo.service.EmployeeService employeeService;//TODO
-global com.plugtree.dm.dmdemo.service.MedicalCommitteeService medicalCommitteeService;//TODO
+global com.plugtree.dm.services.PayrollService payrollService;//TODO
+global com.plugtree.dm.services.EmployeeService employeeService;//TODO
+global com.plugtree.dm.services.MedicalCommitteeService medicalCommitteeService;//TODO
 
 dialect "mvel"
 
